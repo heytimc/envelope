@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Package Manager</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        
+        <script>
+            // order path array so that the C does not trip up on folders/files that don't exist yet
+            function sortPathArraysInOperationOrder(array) {
+                'use strict';
+                
+                // sort folders by number of slashes (least number of slashes to greatest number of slashes)
+                array.sort(function(a, b) {
+                    return (a.match(/\//g) || '').length - (b.match(/\//g) || '').length;
+                });
+                
+                return array;
+            }
+            
+            // load package list into panel
+            function loadPackageList(strHighlight) {
+                GS.ajaxJSON('/v1/postage/action_package', 'action=list', function (response, error) {
+                    var i, len, strHTML = '', data, strName, packageListContainer = document.getElementById('package-list-container');
+                    
+                    if (!error) {
+                        data = response.dat;
+                        
+                        strHTML += '<b>Open Packages:</b>';
+                        for (i = 0, len = data.directories.length; i < len; i += 1) {
+                            strName = data.directories[i];
+                            
+                            strHTML +=
+                                '<div flex-horizontal>' +
+                                    '<gs-button flex data-package-name="' + strName + '" remove-right ' +
+                                            'onclick="highlightPackage(this);loadPackage(\'' + strName + '\');">' +
+                                        strName +
+                                    '</gs-button>' +
+                                    '<gs-button onclick="deletePackage(\'' + strName + '\')" remove-left icononly icon="times"></gs-button>' +
+                                '</div>';
+                            
+                            // <gs-button onclick="deleteHighlighted();" icononly icon="times" disabled remove-left></gs-button>
+                        }
+                        if (data.directories.length === 0) {
+                            strHTML += '<br />';
+                        }
+                        
+                        strHTML += '<br /><b>Unopened Packages:</b>';
+                        for (i = 0, len = data.files.length; i < len; i += 1) {
+                            strName = data.files[i];
+                            
+                            strHTML +=  '<div flex-horizontal>' +
+                                            '<gs-button flex onclick="openPackage(\'' + strName + '\');" remove-right>' + strName + '</gs-button>' +
+                                            '<gs-button onclick="deletePackage(\'' + strName + '\')" icononly icon="times" remove-left></gs-button>' +
+                                        '</div>';
+                        }
+                        
+                        packageListContainer.innerHTML = strHTML;
+                        
+                        if (strHighlight) {
+                            highlightPackage(xtag.query(packageListContainer, 'gs-button[data-package-name="' + strHighlight + '"]')[0]);
+                        }
+                        
+                    } else {
+                        GS.ajaxErrorDialog(response, function () {
+                            loadPackageList(strHighlight)
+                        });
+                    }
+                });
+            }
+            
+            // open a confirmation dialog if the answer is yes: delete the path
+            function deletePackage(strName) {
+                GS.msgbox('Are you sure...', '<center><b>Are you sure you want to do delete?</b></center>',
+                                                                    ['No', 'Yes'], function (strAnswer) {
+                    if (strAnswer === 'Yes') {
+                        GS.ajaxJSON('/v1/postage/action_package', 'action=rm&paths=' + encodeURIComponent('["' + strName + '"]'),
+                                                                  function (data, error) {
+                            if (!error) {
+                                loadPackageList();
+                            } else {
+                                GS.ajaxErrorDialog(data, function () {
+                                    loadPackageList(strHighlight)
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // handle package selection in package list
+            function highlightPackage(element) {
+                var i, len, arrElement = xtag.query(document.getElementById('package-list-container'), '[selected]');
+                
+                for (i = 0, len = arrElement.length; i < len; i += 1) {
+                    arrElement[i].removeAttribute('selected');
+                }
+                
+                element.setAttribute('selected', '');
+            }
+            
+            // create Element for a line in the package tree
+            function elementForLine(strType, strPath, strName, intLevel) {
+                var strHTML = '', recordElement = document.createElement('tr');
+                
+                recordElement.classList.add('line');
+                recordElement.setAttribute('data-type', strType);
+                recordElement.setAttribute('data-name', strName);
+                recordElement.setAttribute('data-level', intLevel);
+                recordElement.setAttribute('data-path', strPath + '/' + strName);
+                
+                strHTML += '<td><gs-checkbox value="true" mini remove-all></gs-checkbox></td>';
+                strHTML += '<td>' +
+                                '<gs-grid widths="45">' +
+                                    '<gs-block width="' + intLevel + '"></gs-block>' +
+                                    '<gs-block width="' + (36 - intLevel) + '">';
+                
+                if (strType === 'file') {
+                    strHTML +=          strName;
+                } else {
+                    strHTML +=          '<b>' + strName + '</b>';
+                }
+                
+                strHTML +=          '</gs-block>' +
+                                '</gs-grid>' +
+                            '</td>';
+                strHTML += '<td>';
+                
+                strHTML += '    <gs-button class="view-button" icononly icon="file" mini ' + (strType === 'file' ? '' : 'disabled ') +
+                                   'onclick="viewFile(\'' + strPath + '/' + strName + '\', ' +
+                                                'this.getAttribute(\'data-exists\') === \'true\')" remove-all></gs-button>';
+                
+                strHTML += '</td>';
+                strHTML += '<td class="cell-warning"></td>';
+                
+                recordElement.innerHTML = strHTML;
+                
+                return recordElement;
+                
+                //'<div class="' + strType + '-toolbar"></div>';
+                
+                /*
+                strHTML =   '<div flex-horizontal class="line" data-type="' + strType + '" ' +
+                                                              'data-name="' + strName + '" ' +
+                                                              'data-level="' + intLevel + '" ' +
+                                                              'data-path="' + strPath + '/' + strName + '">' +
+                                '<div class="' + strType + '-toolbar">' +
+                                    '<gs-checkbox value="true"></gs-checkbox>';
+                
+                if (strType === 'file') {
+                strHTML +=          '<span>&nbsp;</span>' +
+                                    '<gs-button class="view-button" icononly icon="eye" inline ' +
+                                               'onclick="viewFile(\'' + strPath + '/' + strName + '\', ' +
+                                                        'this.getAttribute(\'data-exists\') === \'true\')"></gs-button>';
+                }
+                
+                strHTML +=      '</div>' +
+                                '<gs-grid widths="45" flex>' +
+                                    '<gs-block width="' + intLevel + '"></gs-block>' +
+                                    '<gs-block width="' + (36 - intLevel) + '">';
+                
+                if (strType === 'file') {
+                    strHTML +=          strName;
+                } else {
+                    strHTML +=          '<b>' + strName + '</b>';
+                }
+                
+                strHTML +=          '</gs-block>' +
+                                '</gs-grid>' +
+                            '</div>';
+                */
+                
+                
+                return GS.stringToElement(strHTML);
+            }
+            
+            // test whether or not a file might clobber and if it does make the button red with a title attribute
+            function testClobberForLine(lineElement, strPath) {
+                var strFolder;
+                
+                //console.log(strPath);
+                strPath = strPath.substring(strPath.indexOf('/') + 1);
+                //console.log(strPath);
+                strFolder = strPath.substring(0, strPath.indexOf('/'));
+                //console.log(strPath, strFolder);
+                strPath = strPath.substring(strPath.indexOf('/') + 1);
+                //console.log(strPath);
+                
+                if (strFolder !== 'role') {
+                    GS.ajaxJSON('/v1/postage/action_file', 'action=exists' +
+                                                '&path=' + encodeURIComponent(strPath) +
+                                                '&folder=' + strFolder,
+                                                function (data, error) {
+                        var buttonElement;
+                        
+                        if (!error) {
+                            buttonElement = xtag.query(lineElement, '.view-button')[0];
+                            
+                            if (data.dat) {
+                                buttonElement.setAttribute('data-exists', 'true');
+                                buttonElement.setAttribute('title', 'A file with this name already exists in your codebase.');
+                                buttonElement.classList.add('red');
+                                xtag.query(lineElement, '.cell-warning')[0].textContent += '(Already Exists)';
+                            } else {
+                                buttonElement.setAttribute('data-exists', 'false');
+                            }
+                        } else {
+                            GS.ajaxErrorDialog(data);
+                        }
+                    });
+                }
+            }
+            
+            // open a dialog for replace string if the user continues: then load the opened package
+            function openPackage(strFileName) {
+                var strPackageName = strFileName.substring(0, strFileName.indexOf('.'));
+                
+                //console.log(strPackageName);
+                
+                GS.msgbox('Open Package',
+                            ml(function () {/*
+                                This will expand the contents of the file: "{{FILE}}". You need to choose a name for all of the objects, files, folders, groups and other items to use. The default for this package is "{{DEFAULT}}", but you can change it to avoid clobbering if you need to. If you want to upgrade an older installation of this package then use the same name to overwrite/clobber the old files.
+                                <br /><br />
+                                <label for="text-replace-with">Name:</label>
+                                <gs-text id="text-replace-with" value="{{DEFAULT}}"></gs-text>
+                            */}).replace(/\{\{FILE\}\}/gim, strFileName).replace(/\{\{DEFAULT\}\}/gim, strPackageName),
+                            ['Cancel', 'Open'],
+                            function (strAnswer) {
+                    var strReplaceWith = document.getElementById('text-replace-with').value;
+                    
+                    if (strAnswer === 'Open') {
+                        GS.ajaxJSON('/v1/postage/action_package', 'action=open' +
+                                                                   '&path=' + encodeURIComponent(strFileName) +
+                                                                   '&find=' + encodeURIComponent(strPackageName) +
+                                                                   '&replace=' + encodeURIComponent(strReplaceWith),
+                                                                    function (data, error) {
+                            if (!error) {
+                                loadPackageList(strReplaceWith);
+                                loadPackage(strReplaceWith);
+                            } else {
+                                GS.ajaxErrorDialog(data);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // traverse folders on a loop to get the tree lines for the package contents
+            function packageContentLooper(element, strPath, intLevel) {
+                GS.ajaxJSON('/v1/postage/action_package',
+                                'action=list&path=' + encodeURIComponent(strPath), function (response, error) {
+                    var i, len, strHTML = '', data, insertElement;
+                    
+                    if (!error) {
+                        data = response.dat;
+                        
+                        for (i = 0, len = data.directories.length; i < len; i += 1) {
+                            insertElement = elementForLine('folder', strPath, data.directories[i], intLevel);
+                            GS.insertElementAfter(insertElement, element);
+                            
+                            packageContentLooper(insertElement, strPath + '/' + data.directories[i], intLevel + 1);
+                        }
+                        
+                        for (i = 0, len = data.files.length; i < len; i += 1) {
+                            if (data.files[i] !== '.DS_Store') {
+                                insertElement = elementForLine('file', strPath, data.files[i], intLevel);
+                                GS.insertElementAfter(insertElement, element);
+                                
+                                testClobberForLine(insertElement, strPath + '/' + data.files[i]);
+                            }
+                        }
+                        
+                    } else {
+                        GS.ajaxErrorDialog(response, function () {
+                            loadPackage(element, strPackageName);
+                        });
+                    }
+                });
+            }
+            
+            // load/bind the file structure of a selected package, add install button
+            function loadPackage(strPackageName) {
+                var loadFolder;
+                
+                // put in starter HTML for the package contents and install button
+                document.getElementById('package-content-container-container').innerHTML =
+                    '<gs-button onclick="installPackage(\'' + strPackageName + '\')">Install Package <span id="selection-count" class="hint">(All Items Selected)</span></gs-button>' +
+                    '<hr />' +
+                    '<table>' +
+                        //'<thead>' +
+                        //    '<th></th>' +
+                        //    '<th>File</th>' +
+                        //    '<th></th>' +
+                        //    '<th>Warnings</th>' +
+                        //'</thead>' +
+                        '<tbody id="package-content-container"></tbody>' +
+                    '</table>';
+                
+                // when a checkbox in the package content list is changed
+                document.getElementById('package-content-container').addEventListener('change', function (event) {
+                    var intChecked, intAll, target = event.target, i, len, arrElements, intFolderLevel, targetLine;
+                    
+                    // if the control that was changed belongs to a folder
+                    if (target.parentNode.parentNode.getAttribute('data-type') === 'folder') {
+                        targetLine = GS.findParentElement(target, '.line');
+                        intFolderLevel = parseInt(targetLine.getAttribute('data-level'), 10);
+                        arrElements = xtag.toArray(document.getElementById('package-content-container').children);
+                        
+                        // if the control is unchecked: uncheck and disabled child files/folders
+                        if (target.value === 'false') {
+                            for (i = arrElements.indexOf(targetLine) + 1, len = arrElements.length; i < len; i += 1) {
+                                if (parseInt(arrElements[i].getAttribute('data-level'), 10) <= intFolderLevel) {
+                                    break;
+                                } else {
+                                    arrElements[i].setAttribute('disabled', '');
+                                    xtag.query(arrElements[i], 'gs-checkbox')[0].value = false;
+                                }
+                            }
+                        // if the control is checked: check and enable child files/folders
+                        } else {
+                            for (i = arrElements.indexOf(targetLine) + 1, len = arrElements.length; i < len; i += 1) {
+                                if (parseInt(arrElements[i].getAttribute('data-level'), 10) <= intFolderLevel) {
+                                    break;
+                                } else {
+                                    arrElements[i].removeAttribute('disabled');
+                                    xtag.query(arrElements[i], 'gs-checkbox')[0].value = true;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // update items selected in install button
+                    intChecked = xtag.query(document.getElementById('package-content-container'), 'gs-checkbox[value="true"]').length;
+                    intAll = xtag.query(document.getElementById('package-content-container'), 'gs-checkbox').length;
+                    
+                    if (intChecked === intAll) {
+                        document.getElementById('selection-count').textContent = '(All Items Selected)';
+                    } else {
+                        document.getElementById('selection-count').textContent = intChecked + ' Items Of ' + intAll + ' Selected';
+                    }
+                });
+                
+                // start package content traversal, call the looper function on the folders
+                GS.ajaxJSON('/v1/postage/action_package',
+                                'action=list&path=' + encodeURIComponent(strPackageName), function (response, error) {
+                    var i, len, strHTML = '', data, appendElement;
+                    
+                    if (!error) {
+                        data = response.dat;
+                        
+                        for (i = 0, len = data.directories.length; i < len; i += 1) {
+                            appendElement = elementForLine('folder', strPackageName, data.directories[i], 1);
+                            document.getElementById('package-content-container').appendChild(appendElement);
+                            
+                            packageContentLooper(appendElement, strPackageName + '/' + data.directories[i], 2);
+                        }
+                        
+                        for (i = 0, len = data.files.length; i < len; i += 1) {
+                            if (data.files[i] !== '.DS_Store') {
+                                appendElement = elementForLine('file', strPackageName, data.files[i], 1);
+                                document.getElementById('package-content-container').appendChild(appendElement);
+                                
+                                testClobberForLine(appendElement, strPackageName + '/' + data.files[i]);
+                            }
+                        }
+                        
+                    } else {
+                        GS.ajaxErrorDialog(response, function () {
+                            loadPackageList();
+                        });
+                    }
+                });
+            }
+            
+            // after confirmation: run the upgrade action on the list of checked files
+            function installPackage(strPackageName) {
+                var intChecked = xtag.query(document.getElementById('package-content-container'), 'gs-checkbox[value="true"]').length,
+                    intAll = xtag.query(document.getElementById('package-content-container'), 'gs-checkbox').length;
+                
+                GS.msgbox(  'Are you sure?',
+                            '<center>' +
+                                'You will be installing ' + (intChecked === intAll ? 'all' : intChecked + ' of ' + intAll) + ' items.' +
+                                '<br /><br />' +
+                                'Are you sure you wish to continue with the installation?' +
+                            '</center>',
+                            ['No', 'Yes, Install'],
+                            function (strAnswer) {
+                    if (strAnswer === 'Yes, Install') {
+                        var arrFolder = [], arrFile = [], i, len, arrElements, parentLine;
+                        
+                        // build folder and file list
+                        arrElements = xtag.query(document.getElementById('package-content-container'),
+                                                'gs-checkbox[value="true"]');
+                        
+                        for (i = 0, len = arrElements.length; i < len; i += 1) {
+                            parentLine = GS.findParentElement(arrElements[i], '.line');
+                            
+                            if (parentLine.getAttribute('data-type') === 'folder') {
+                                arrFolder.push(parentLine.getAttribute('data-path'));
+                            } else {
+                                arrFile.push(parentLine.getAttribute('data-path'));
+                            }
+                        }
+                        
+                        arrFolder = sortPathArraysInOperationOrder(arrFolder);
+                        arrFile   = sortPathArraysInOperationOrder(arrFile);
+                        
+                        //console.log('["' + arrFolder.join('","') + '"]', '["' + arrFile.join('","') + '"]');
+                        
+                        // run upgrade on the package
+                        GS.addLoader('package-install', 'Installing...');
+                        GS.ajaxJSON('/v1/postage/action_package',
+                                             'action=upgrade' +
+                                            '&folders=' + encodeURIComponent('["' + arrFolder.join('","') + '"]') +
+                                            '&files=' + encodeURIComponent('["' + arrFile.join('","') + '"]') +
+                                            '&path=' + encodeURIComponent(strPackageName),
+                                            function (data, error) {
+                            var i, len, strHTML, strFolder, strVisitLink, strDesignLink;
+                            
+                            GS.removeLoader('package-install');
+                            
+                            if (!error) {
+                                
+                                // role
+                                // dev
+                                // web_root
+                                // sql
+                                
+                                for (i = 0, len = arrFile.length, strHTML = ''; i < len; i += 1) {
+                                    // trim package folder off
+                                    arrFile[i] = arrFile[i].substring(arrFile[i].indexOf('/') + 1, arrFile[i].length);
+                                    
+                                    // get/trim target folder off of path but leave '/'
+                                    strFolder = arrFile[i].substring(0, arrFile[i].indexOf('/'))
+                                    arrFile[i] = arrFile[i].substring(arrFile[i].indexOf('/'), arrFile[i].length);
+                                    
+                                    // create links
+                                    if (strFolder === 'dev') {
+                                        if (arrFile[i].indexOf('developer_g') === 0) {
+                                            strVisitLink = '/v1/dev' + arrFile[i];
+                                        } else {
+                                            strVisitLink = '/v1/app' + arrFile[i];
+                                        }
+                                        
+                                    } else if (strFolder === 'role') {
+                                        strVisitLink = '/v1/role' + arrFile[i];
+                                        
+                                    } else if (strFolder === 'web_root') {
+                                        strVisitLink = arrFile[i];
+                                    } else {
+                                        strVisitLink = '/v1/dev/developer_g/greyspots-' + GS.version() + '/tools/postage/index.html' +
+                                                                '?file=' + encodeURIComponent(arrFile[i])
+                                    }
+                                    
+                                    if (strFolder === 'dev' || strFolder === 'role' || strFolder === 'web_root') {
+                                        strDesignLink = '/v1/dev/developer_g/greyspots-' + GS.version() + '/tools/file_manager/file_edit.html' +
+                                                                '?link=' + encodeURIComponent(arrFile[i]) + '&folder=' + strFolder;
+                                        
+                                    } else {
+                                        strDesignLink = '/v1/dev/developer_g/greyspots-' + GS.version() + '/tools/postage/index.html' +
+                                                                '?file=' + encodeURIComponent(arrFile[i])
+                                    }
+                                    
+                                    strHTML += 
+                                            '<div flex-horizontal>' +
+                                                '<span flex>' + arrFile[i] + '</span>' +
+                                                '<gs-button href="' + strDesignLink + '" icononly icon="wrench" remove-right></gs-button>' +
+                                                '<gs-button href="' + strVisitLink + '" target="_blank" icononly icon="share" remove-left></gs-button>' +
+                                            '</div>';
+                                }
+                                
+                                GS.msgbox('Installation Successful',
+                                          'The installation was successful. Here is the list of files that were installed:<br /><br />' +
+                                            strHTML,
+                                          ['Awesome']);
+                                
+                            } else {
+                                GS.ajaxErrorDialog(data);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // view a file from the package contents
+            //      (if the file that we will b viewing will clobber a file:
+            //          show both the package file and the file that may be clobbered in a split screen)
+            function viewFile(strPath, bolExists) {
+                var templateElement = document.createElement('template'),
+                    strHeadHTML, strBodyHTML, packageEditor, oldEditor, strFolder;
+                
+                // if the file we will be viewing already exists: prepare HTML for two ace editors side by side
+                if (bolExists) {
+                    strHeadHTML = ml(function () {/*
+                                    <gs-grid class="pkg-ace-grid" not-responsive>
+                                        <gs-block class="pkg-ace-block"><center><h3 class="pkg-ace-header">Old File</h3></center></gs-block>
+                                        <gs-block class="pkg-ace-block"><center><h3 class="pkg-ace-header">Package File</h3></center></gs-block>
+                                    </gs-grid>
+                                */});
+                    strBodyHTML = ml(function () {/*
+                                    <gs-grid class="pkg-ace-grid" not-responsive padded>
+                                        <gs-block class="pkg-ace-block"><div id="ace-view-old" class="pkg-ace"></div></gs-block>
+                                        <gs-block class="pkg-ace-block"><div id="ace-view-package" class="pkg-ace"></div></gs-block>
+                                    </gs-grid>
+                                */});
+                    
+                // else if the file we will be view does not already exist: prepare HTML for one ace editor
+                } else {
+                    strHeadHTML = ml(function () {/*
+                                    <center><h3 class="pkg-ace-header">Package File</h3></center>
+                                */});
+                    strBodyHTML = ml(function () {/*
+                                    <div id="ace-view-package" class="pkg-ace"></div>
+                                */});
+                }
+                
+                templateElement.setAttribute('data-mode', 'constrained');
+                templateElement.setAttribute('data-max-width', '1000px');
+                templateElement.innerHTML = ml(function () {/*
+                    <gs-page>
+                        <gs-header>{{HEADHTML}}</gs-header>
+                        <gs-body {{PADDING}}>
+                            {{BODYHTML}}
+                        </gs-body>
+                        <gs-footer><gs-button dialogclose>Ok</gs-button></gs-footer>
+                    </gs-page>
+                */}).replace('{{HEADHTML}}', strHeadHTML)
+                    .replace('{{BODYHTML}}', strBodyHTML)
+                    .replace('{{PADDING}}', (!bolExists ? 'padded' : ''));
+                
+                // open a dialog with the prepared HTML
+                GS.openDialog(templateElement, function () {
+                    // create the ace for the package file (this ace be there regardless of whether or not the file already exists)
+                    packageEditor = ace.edit('ace-view-package');
+                    packageEditor.setTheme('ace/theme/eclipse');
+                    packageEditor.setShowPrintMargin(false);
+                    packageEditor.setDisplayIndentGuides(true);
+                    packageEditor.setShowFoldWidgets(false);
+                    packageEditor.session.setUseWrapMode('free');
+                    packageEditor.setBehavioursEnabled(false);
+                    packageEditor.$blockScrolling = Infinity; // <== blocks a warning
+                    
+                    if (evt.touchDevice) {
+                        editor.setOptions({ maxLines: Infinity });
+                    } else {
+                        document.getElementById('ace-view-package').style.height = '100%';
+                    }
+                    
+                    packageEditor.resize(true);
+                    packageEditor.setReadOnly(true);
+                    
+                    // fill package file ace
+                    GS.ajaxJSON('/v1/postage/action_package', 'action=read' +
+                                                            '&path=' + encodeURIComponent(strPath), function (data, error) {
+                        if (!error) {
+                            packageEditor.setValue(data.dat.content);
+                            packageEditor.resize(true);
+                        } else {
+                            GS.ajaxErrorDialog(data);
+                        }
+                    });
+                    
+                    // if the file we will be viewing already exists: create and fill ace for the file that the package will clobber
+                    if (bolExists) {
+                        oldEditor = ace.edit('ace-view-old');
+                        oldEditor.setTheme('ace/theme/eclipse');
+                        oldEditor.setShowPrintMargin(false);
+                        oldEditor.setDisplayIndentGuides(true);
+                        oldEditor.setShowFoldWidgets(false);
+                        oldEditor.session.setUseWrapMode('free');
+                        oldEditor.setBehavioursEnabled(false);
+                        oldEditor.$blockScrolling = Infinity; // <== blocks a warning
+                        
+                        if (evt.touchDevice) {
+                            editor.setOptions({ maxLines: Infinity });
+                        } else {
+                            document.getElementById('ace-view-old').style.height = '100%';
+                        }
+                        
+                        oldEditor.resize(true);
+                        oldEditor.setReadOnly(true);
+                        
+                        strPath = strPath.substring(strPath.indexOf('/') + 1);
+                        strFolder = strPath.substring(0, strPath.indexOf('/'));
+                        strPath = strPath.substring(strPath.indexOf('/') + 1);
+                        
+                        // fill old file ace
+                        GS.ajaxJSON('/v1/postage/action_file', 'action=read' +
+                                                              '&folder=' + strFolder +
+                                                              '&path=' + encodeURIComponent(strPath),
+                                                              function (data, error) {
+                            if (!error) {
+                                oldEditor.setValue(data.dat.content);
+                                oldEditor.resize(true);
+                            } else {
+                                GS.ajaxErrorDialog(data);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // open a dialog for uploading packages
+            function uploadDialog() {
+                GS.openDialog('dialog-package-upload', function () {
+                    // when the "Upload Package" button is clicked
+                    document.getElementById('button-package-upload').addEventListener('click', function(event) {
+                        // no file is chosen: error
+                        if (document.getElementById('upload-file-content').value === '') {
+                            GS.msgbox('Error', 'Please choose a file for the package.', 'okonly');
+                            
+                        // a file is chosen: submit the form
+                        } else {
+                            GS.addLoader('package-upload', 'Uploading file...');
+                            document.getElementById('form-file-upload').submit();
+                        }
+                    });
+                    
+                    // when the package control is filled: fill the hidden file name input
+                    document.getElementById('upload-file-content').addEventListener('change', function(event) {
+                        var strValue = this.value, uploadNameControl = document.getElementById('upload-file-name');
+                        
+                        uploadNameControl.value = uploadNameControl.value + strValue.substring(strValue.lastIndexOf('\\') + 1);
+                    });
+                });
+            }
+            
+            window.addEventListener('load', function () {
+                // load inital package list
+                loadPackageList();
+                
+                //GS.ajaxJSON('/v1/postage/action_package', 'action=rm&paths=' + encodeURIComponent('["__MACOSX"]'), function (data, error) {
+                //    console.log(data, error);
+                //});
+                
+                // when the form is submitted this iframe is reloaded (because of an upload)
+                //      when it is reloaded we parse the data that is now in it looking for success
+                document.getElementById('upload-response-iframe').addEventListener('load', function (event) {
+                    var strResponseText = document.getElementById('upload-response-iframe').contentWindow.document.body.textContent,
+                        jsnResponse, strResponse, bolError, strError;
+                    
+                    GS.removeLoader('package-upload');
+                    
+                    // get error text
+                    try {
+                        jsnResponse = JSON.parse(strResponseText);
+                        
+                    } catch (err) {
+                        strResponse = strResponseText;
+                    }
+                    
+                    // if we were able to mine out some JSON: check stat
+                    if (jsnResponse) {
+                        // if stat is true: error is false
+                        if (jsnResponse.stat === true) {
+                            bolError = false;
+                            
+                        // else if stat is false: error is true, get error string
+                        } else {
+                            bolError = true;
+                            if (jsnResponse.dat && jsnResponse.dat.error) {
+                                strError = jsnResponse.dat.error;
+                            } else {
+                                strError = jsnResponse.dat;
+                            }
+                        }
+                        
+                    // if we could not find any JSON: error is true, error string is te returned text
+                    } else {
+                        bolError = true;
+                        strError = strResponse;
+                    }
+                    
+                    // if there is no error destroy the package upload dialog
+                    if (!bolError) {
+                        GS.closeDialog(document.getElementsByTagName('gs-dialog')[0], 'cancel');
+                        
+                    // if there is an error: open error dialog with error string
+                    } else {
+                        GS.msgbox('Error', strError, 'okonly');
+                    }
+                    
+                    // re-load package list
+                    loadPackageList();
+                });
+            });
+        </script>
+        <style>
+            #package-list-container,
+            #package-content-container {
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            gs-button.red {
+                background-color: #F7E9E9;
+                border-color: #BE3B3B;
+                color: #BE3B3B;
+            }
+            
+            .pkg-ace-grid,
+            .pkg-ace-block {
+                height: 100%;
+            }
+            
+            div.pkg-ace {
+                font-size: 0.8em;
+                outline: 1px solid #000000;
+                background-color: #D5D5D5;
+            }
+            
+            .pkg-ace-header {
+                margin: 0.2em;
+            }
+            
+            .line td {
+                border-bottom: 0 none;
+                border-left: 0 none;
+            }
+            
+            .line[disabled] {
+                background-color: #D5D5D5 !important;
+            }
+            
+            .line[disabled] gs-checkbox,
+            .line[disabled] gs-button {
+                background-color: #C5C5C5;
+                color: #909090;
+            }
+        </style>
+    </head>
+    <body class="blue">
+        <template id="dialog-package-upload">
+            <gs-page>
+                <gs-header><center><h3>Upload a Package</h3></center></gs-header>
+                <gs-body padded>
+                    <form id="form-file-upload" action="/v1/postage/action_package_upload" 
+                            method="POST" enctype="multipart/form-data" target="upload_response">
+                       <input type="file" id="upload-file-content" name="file_content" />
+                       <input type="text" id="upload-file-name" name="file_name" hidden />
+                    </form>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button id="button-package-upload">Upload Package</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <gs-panel id="panel">
+            <gs-page id="left-bar" style="width: 17em;">
+                <gs-header flex-horizontal>
+                    <h3 flex>Package Manager</h3>
+                    <gs-button onclick="uploadDialog();" icononly icon="plus"></gs-button>
+                </gs-header>
+                <gs-body id="package-list-container" padded></gs-body>
+            </gs-page>
+            <gs-page>
+                <gs-header>
+                    <h3>Package Contents</h3>
+                </gs-header>
+                <gs-body id="package-content-container-container" padded></gs-body>
+            </gs-page>
+        </gs-panel>
+        <iframe id="upload-response-iframe" name="upload_response" hidden></iframe>
+    </body>
+</html>

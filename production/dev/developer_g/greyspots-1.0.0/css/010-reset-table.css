@@ -1,0 +1,63 @@
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #FFFFFF;
+}
+
+td, th {
+    text-align: left;
+    padding: 0.15em;
+    border-left: 1px solid #168216;
+    border-bottom: 1px solid #168216;
+    /*word-break: break-word;*/
+}
+
+tr td:first-child,
+tr th:first-child {
+    border-left: 0 none;
+}
+
+table thead th {
+    border-bottom: 2px solid #13AB13;
+}
+
+table tr * {
+    background-color: transparent;
+}
+
+tr:nth-child(even) {
+    background-color: #E9F1E9;
+}
+
+table thead tr {
+    border-bottom: 2px solid #13AB13;
+    cursor: default;
+}
+
+table th {
+    text-align: center;
+}
+
+
+/* ###################################### */
+/* ############# BLUE THEME ############# */
+/* ###################################### */
+
+.blue tr:nth-child(even) {
+    background-color: #E9EFF7;
+}
+
+.blue table thead tr,
+table.blue thead tr,
+table thead.blue tr,
+table thead tr.blue {
+    border-color: #3B99BE;
+}
+
+.blue td,
+.blue th,
+td.blue,
+th.blue {
+    border-color: #3B99BE;
+}

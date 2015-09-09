@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title class="title">Home</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script>
+            var statusUpdateTimerID, strSubdomain, strHost, strLastVersionFolder;
+            
+            // #####################################################################
+            // ####################### REPO STATUS FUNCTIONS #######################
+            // #####################################################################
+            
+            function statusUpdate(bolLoader) {
+                'use strict';
+                if (bolLoader) {
+                    GS.addLoader(document.getElementById('status-container'), 'Loading...<br />Please Wait.');
+                }
+                
+                GS.ajaxJSON('/v1/postage/action_file', 'action=status&folder=dev', function (data, error) {
+                    if (bolLoader) {
+                        GS.removeLoader(document.getElementById('status-container'));
+                    }
+                    
+                    if (!error) {
+                        document.getElementById('status-container').textContent = data.dat;
+                        
+                    } else {
+                        console.error(data);
+                        
+                        document.getElementById('status-container').textContent =
+                                'There was an error when trying to get the status on this repository. See the console for more details.';
+                    }
+                });
+            }
+            
+            function startStatusLooper(bolLoader) {
+                'use strict';
+                statusUpdate(bolLoader);
+                
+                statusUpdateTimerID = setInterval(function() {
+                    statusUpdate();
+                }, 300000);
+            }
+            
+            function refreshStatusLooper() {
+                clearInterval(statusUpdateTimerID);
+                startStatusLooper(true);
+            }
+            
+            // ####################################################################
+            // ####################### LOGIN TYPE FUNCTIONS #######################
+            // ####################################################################
+            
+            function superLoggedInAtProduction() {
+                var element;
+                
+                //console.log('superLoggedInAtProduction');
+                
+                document.getElementById('super-login-section-container').removeAttribute('hidden');
+                document.getElementById('button-login-super').addEventListener('click', function () {
+                    GS.superUserLogin(function (data) {
+                        window.location = window.location.protocol + '//' +
+                            data.superusername + strHost.substring(strHost.indexOf('.')) +
+                            window.location.pathname;
+                    });
+                });
+                
+                element = document.getElementById('version-control-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('status-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('developer-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('combo-session-user');
+                element.parentNode.removeChild(element);
+                
+                document.getElementById('button-logout-super').setAttribute('hidden', '');
+                document.getElementById('button-logout-user').removeAttribute('hidden');
+                
+                document.getElementById('user-section-container').setAttribute('width', '2');
+            }
+            
+            function superNotLoggedInAtProduction() {
+                var element;
+                
+                //console.log('superNotLoggedInAtProduction');
+                
+                document.getElementById('super-login-section-container').removeAttribute('hidden');
+                document.getElementById('super-login-section-container').addEventListener('click', function () {
+                    GS.superUserLogin(function (data) {
+                        window.location = window.location.protocol + '//' +
+                            data.superusername + strHost.substring(strHost.indexOf('.')) +
+                            window.location.pathname;
+                    });
+                });
+                
+                element = document.getElementById('version-control-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('status-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('developer-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('combo-session-user');
+                element.parentNode.removeChild(element);
+                
+                document.getElementById('button-logout-super').setAttribute('hidden', '');
+                document.getElementById('button-logout-user').removeAttribute('hidden');
+                
+                document.getElementById('user-section-container').setAttribute('width', '2');
+            }
+            
+            function normalUser() {
+                var element;
+                
+                //console.log('normalUser');
+                
+                element = document.getElementById('super-login-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('version-control-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('status-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('developer-section-container');
+                element.parentNode.removeChild(element);
+                
+                element = document.getElementById('combo-session-user');
+                element.parentNode.removeChild(element);
+                
+                document.getElementById('button-logout-super').setAttribute('hidden', '');
+                document.getElementById('button-logout-user').removeAttribute('hidden');
+                
+                document.getElementById('user-section-container').setAttribute('width', '2');
+            }
+            
+            function superLoggedInAtDevelopment() {
+                var element, arrElements, i, len;
+                
+                //console.log('superLoggedInAtDevelopment');
+                
+                element = document.getElementById('super-login-section-container');
+                element.parentNode.removeChild(element);
+                
+                document.getElementById('version-control-section-container').removeAttribute('hidden');
+                document.getElementById('status-section-container').removeAttribute('hidden');
+                document.getElementById('developer-section-container').removeAttribute('hidden');
+                
+                // set/bind session user combobox
+                if (GS.qryGetVal(GS.getQueryString(), 'session_user')) {
+                    document.getElementById('link-status-warning').textContent = 'WARNING: DATA WILL BE LOST DURING THE NEXT PULL';
+                    document.getElementById('combo-session-user').value = userData.current_user;
+
+                } else {
+                    document.getElementById('link-status-warning').textContent = ('WARNING: DATA WILL BE SAVED TO PRODUCTION');
+                    document.getElementById('combo-session-user').value = 'Production';
+                    
+                    arrElements = document.querySelectorAll('#user-app-list-container a[href]');
+                    
+                    for (i = 0, len = arrElements.length; i < len; i += 1) {
+                        arrElements[i].setAttribute('href', window.location.protocol + '//' + (userData.default_domain || userData.default_subdomain) +
+                                                            window.location.host.substring(window.location.host.indexOf('.')) +
+                                                            arrElements[i].getAttribute('href'));
+                    }
+                }
+                
+                document.getElementById('combo-session-user').removeAttribute('hidden');
+                document.getElementById('combo-session-user').addEventListener('change', function () {
+                    var strValue = this.textValue;
+
+                    if (strValue === 'Production') {
+                        GS.ajaxJSON('/v1/postage/auth', 'action=change&session_user=' + encodeURIComponent(userData.username), function(data, error) {
+                            if (!error) {
+                                window.location.search = '?' + GS.qryDeleteKey(GS.getQueryString(), 'session_user');
+                            } else {
+                                GS.ajaxErrorDialog(data);
+                            }
+                        });
+                        
+                    } else {
+                        GS.ajaxJSON('/v1/postage/auth', 'action=change&session_user=' + encodeURIComponent(strValue), function(data, error) {
+                            if (!error) {
+                                window.location.search = 'session_user=' + encodeURIComponent(strValue);
+                            } else {
+                                GS.ajaxErrorDialog(data);
+                            }
+                        });
+                    }
+                });
+                
+                arrElements = xtag.toArray(document.getElementsByClassName('dev-link'));
+                
+                for (i = 0, len = arrElements.length; i < len; i += 1) {
+                    arrElements[i].setAttribute('href', '/v1/dev/developer_g/greyspots-' + GS.version() + arrElements[i].getAttribute('href'));
+                }
+                
+                document.getElementById('button-logout-super').removeAttribute('hidden');
+                document.getElementById('button-logout-user').setAttribute('hidden', '');
+                
+                // start looping the status
+                startStatusLooper();
+                document.getElementById('button-refresh-status').addEventListener('click', function () {
+                    refreshStatusLooper();
+                });
+            }
+            
+            function release(strMessage) {
+                'use strict';
+                GS.addLoader('release', 'Upgrading Production');
+                GS.ajaxJSON('/v1/postage/action_fossil', 'action=push&reason=' + encodeURIComponent(strMessage), function(data, error) {
+                    GS.removeLoader('release');
+                    
+                    if (!error) {
+                        //fossil commit --tag type=full\nNew_Version: 62074 da021 bca0a ed1c5 f77f0 7b210 60bdf 072f9\n
+                        if (data.dat.match(/fossil commit --tag type=full\nNew_Version: [a-zA-Z0-9]{40}\n/)) {
+                            
+                            GS.msgbox('Success',
+                                      'You have successfully released your changes.<br /><br />' + data.dat.replace(/\n/g, '<br />'),
+                                      ['Ok']);
+                        } else {
+                            GS.openDialog('dialog-failed-release', function () {
+                                document.getElementById('dialog-failed-release-info').innerHTML = data.dat.replace(/\n/g, '<br />');
+                            });
+                        }
+                        refreshStatusLooper();
+
+                    } else {
+                        GS.ajaxErrorDialog(data, function() {
+                            release(strMessage);
+                        });
+                    }
+                });
+            }
+            
+            window.addEventListener('load', function () {
+                GS.ajaxJSON('/v1/env/action_info', '', function (data, error) {
+                    window.userData = data.dat;
+                    GS.triggerEvent(window, 'user-data-loaded');
+                });
+            });
+            
+            window.addEventListener('user-data-loaded', function () {
+                var arrElements, i, len;
+                
+                if (userData.superusername) {
+                    document.getElementById('normal-user-name-label').removeAttribute('hidden');
+                    document.getElementById('normal-user-name-label').innerHTML = 'Welcome: ' + userData.username + ', ' + userData.superusername + ' (superuser)';
+                } else {
+                    document.getElementById('normal-user-name-label').removeAttribute('hidden');
+                    document.getElementById('normal-user-name-label').innerHTML = 'Welcome: ' + userData.username;
+                }
+                
+                strSubdomain = window.location.hostname.substring(0, window.location.hostname.indexOf('.'));
+                strHost = window.location.hostname;
+                
+                arrElements = document.querySelectorAll('*[data-group], *[data-user]');
+                
+                for (i = 0, len = arrElements.length; i < len; i += 1) {
+                    // remove links that have a group attached that is not in your group list (data.groups)
+                    if (arrElements[i].hasAttribute('data-group')) {
+                        if (userData.groups.indexOf(arrElements[i].getAttribute('data-group')) === -1) {
+                            arrElements[i].setAttribute('hidden', '');
+                        }
+                        
+                    // remove links that have a user attached that is not your username (data.session_user)
+                    } else {
+                        if (userData.session_user) {
+                            if (arrElements[i].getAttribute('data-user') !== userData.session_user) {
+                                arrElements[i].setAttribute('hidden', '');
+                            }
+                        } else {
+                            if (arrElements[i].getAttribute('data-user') !== userData.username) {
+                                arrElements[i].setAttribute('hidden', '');
+                            }
+                        }
+                    }
+                }
+                
+                document.getElementById('user-section-container').removeAttribute('hidden');
+                
+                // about dialog
+                document.getElementById('button-about').addEventListener('click', function () {
+                    GS.openDialog('dialog-about', function () {
+                        document.getElementById('dialog-about-pg-version').textContent = userData.postgres_version.split(' ')[1];
+                        document.getElementById('dialog-about-dot-version').textContent = doT.version;
+                    });
+                });
+                
+                // add href to production sql editor button
+                document.getElementById('button-prod-postage').setAttribute('href', window.location.protocol + '//' +
+                                                                        (userData.default_domain || userData.default_subdomain) +
+                                                                        window.location.host.substring(window.location.host.indexOf('.')) +
+                                                                        '/v1/app/developer_g/greyspots-' + GS.version() + '/tools/postage/postage.html');
+                                                                        
+                document.getElementById('button-prod-csv').setAttribute('href', window.location.protocol + '//' +
+                                                                        (userData.default_domain || userData.default_subdomain) +
+                                                                        window.location.host.substring(window.location.host.indexOf('.')) +
+                                                                        '/v1/app/developer_g/greyspots-' + GS.version() + '/tools/csv/index.html');
+                
+                document.getElementById('button-abandon').addEventListener('click', function() {
+                    GS.msgbox('Are you sure?',
+                              'Are you sure you want to reverse all of the changes that you have made since the last push? ' +
+                                'This action is irreversible.',
+                              ['Yes', 'No'],
+                              function(strAnswer) {
+                            if (strAnswer === 'Yes') {
+                                GS.addLoader('abandoning', 'Abandoning commit...');
+                                GS.ajaxJSON('/v1/postage/action_fossil', 'action=abandon', function (data, error) {
+                                    GS.removeLoader('abandoning');
+                                    
+                                    if (!error) {
+                                        GS.msgbox('Success', 'You are now on the latest master.');
+                                        refreshStatusLooper();
+                                        
+                                    } else {
+                                        GS.ajaxErrorDialog(data, function() {
+                                            GS.triggerEvent(document.getElementById('button-abandon'), 'click');
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                });
+
+
+                document.getElementById('button-pull').addEventListener('click', function() {
+                    GS.addLoader('pulling', 'Pulling...');
+                    GS.ajaxJSON('/v1/postage/action_fossil', 'action=test', function (data, error) {
+                        var arr_added, arr_edited, arr_deleted, int_added, int_edited, int_deleted;
+                        
+                        GS.removeLoader('pulling');
+                        
+                        if (!error) {
+                            if (data.dat.indexOf('\nRolling back prior filesystem changes...') === -1) {
+                                arr_added = data.dat.match(/ADDED/gm);
+                                arr_edited = data.dat.match(/EDITED/gm);
+                                arr_deleted = data.dat.match(/DELETED/gm);
+                                int_added = arr_added ? arr_added.length : 0;
+                                int_edited = arr_edited ? arr_edited.length : 0;
+                                int_deleted = arr_deleted ? arr_deleted.length : 0;
+                                
+                                GS.pushMessage( '<center>' +
+                                                    int_added + ' Added, ' + int_edited + ' Edited, ' + int_deleted + ' Deleted' +
+                                                '</center>', 1000);
+                            } else {
+                                GS.openDialog('dialog-pull-error', function () {
+                                    document.getElementById('dialog-pull-error-data').textContent = data.dat;
+                                }, function (event, strAnswer) {
+                                    if (strAnswer === 'Try Again') {
+                                        GS.triggerEvent(document.getElementById('button-pull'), 'click');
+                                    }
+                                });
+                            }
+                            refreshStatusLooper();
+                            
+                        } else {
+                            GS.ajaxErrorDialog(data, function() {
+                                GS.triggerEvent(document.getElementById('button-pull'), 'click');
+                            });
+                        }
+                    });
+                });
+
+                document.getElementById('button-push').addEventListener('click', function () {
+                    GS.openDialog('dialog-release-message', function () {
+                        var dialog = this, releaseMessageControl = document.getElementById('input-release-message');
+                        
+                        releaseMessageControl.focus();
+                        releaseMessageControl.addEventListener('keydown', function (event) {
+                            var intKeyCode = event.which || event.keyCode;
+                            
+                            if (intKeyCode === 13) {
+                                GS.closeDialog(dialog, 'Ok');
+                            }
+                        });
+                    }, function(event, strAnswer) {
+                        if (strAnswer === 'Ok') {
+                            release(document.getElementById('input-release-message').value);
+                        }
+                    });
+                });
+                
+                document.getElementById('button-compile').addEventListener('click', function () {
+                    GS.openDialog('dialog-compile-choice', function () {
+                        var dialog = this, fileNameControl = document.getElementById('text-to-name'),
+                            greyspotsFolderControl = document.getElementById('combo-compile'), handleComboLoad;
+                        
+                        greyspotsFolderControl.addEventListener('change', function () {
+                            if (this.getAttribute('value')) {
+                                fileNameControl.value = this.getAttribute('value')
+                                                            .substring(0, this.getAttribute('value').lastIndexOf('-'));
+                            } else {
+                                fileNameControl.value = this.value.substring(0, this.value.lastIndexOf('-'));
+                            }
+                            fileNameControl.focus();
+                            
+                            if ((!greyspotsFolderControl.value && !greyspotsFolderControl.getAttribute('value')) ||
+                                    !fileNameControl.value) {
+                                document.getElementById('button-dialog-compile').setAttribute('disabled', '');
+                                document.getElementById('button-dialog-mini').setAttribute('disabled', '');
+                            } else {
+                                document.getElementById('button-dialog-compile').removeAttribute('disabled');
+                                document.getElementById('button-dialog-mini').removeAttribute('disabled');
+                            }
+                        });
+                        
+                        if (strLastVersionFolder) {
+                            greyspotsFolderControl.value = strLastVersionFolder;
+                            GS.triggerEvent(greyspotsFolderControl, 'change');
+                        } else {
+                            var comboURI = '%2Fv1%2Fpostage%2Faction_file%3Fsrc%3Dcompile_list' +
+                                            '%26where%3D%26limit%3D%26offset%3D%26order_by%3D%26cols%3D';
+                            
+                            handleComboLoad = function () {
+                                var response = GS.dataLedger[comboURI].response;
+                                strLastVersionFolder = response.dat[response.dat.length - 1][0];
+                                
+                                greyspotsFolderControl.value = strLastVersionFolder;
+                                GS.triggerEvent(greyspotsFolderControl, 'change');
+                            }
+                            
+                            if (typeof(GS.dataLedger[comboURI]) == "undefined" || GS.dataLedger[comboURI].status !== 'finished') {
+                                document.addEventListener('dataready_' + comboURI, handleComboLoad);
+                            } else {
+                                handleComboLoad();
+                            }
+                        }
+                        
+                        fileNameControl.addEventListener('keydown', function () {
+                            var intKeyCode = event.which || event.keyCode;
+                            
+                            if (!greyspotsFolderControl.value || !fileNameControl.value) {
+                                document.getElementById('button-dialog-compile').setAttribute('disabled', '');
+                                document.getElementById('button-dialog-mini').setAttribute('disabled', '');
+                            } else {
+                                document.getElementById('button-dialog-compile').removeAttribute('disabled');
+                                document.getElementById('button-dialog-mini').removeAttribute('disabled');
+                            }
+                            
+                            if (intKeyCode === 13 && greyspotsFolderControl.value && fileNameControl.value) {
+                                GS.closeDialog(dialog, 'Compile');
+                            }
+                        });
+                    }, function (event, strAnswer) {
+                        var strVersionFolder = document.getElementById('combo-compile').value,
+                            strToName = document.getElementById('text-to-name').value;
+                        
+                        if (strAnswer === 'Compile') {
+                            strLastVersionFolder = strVersionFolder;
+                            GS.addLoader('compiling', 'Compiling...');
+                            GS.ajaxJSON('/v1/postage/action_file', 'action=compile' +
+                                                                  '&lib_name=' + strVersionFolder +
+                                                                  '&to_name=' + strToName, function (data, error) {
+                                GS.removeLoader('compiling');
+                                
+                                if (!error) {
+                                    GS.pushMessage('<center>GS library compiled successfully.</center>', 1000);
+                                } else {
+                                    GS.ajaxErrorDialog(data);
+                                }
+                            });
+                        }
+                        if (strAnswer === 'Minify') {
+                            strLastVersionFolder = strVersionFolder;
+                            GS.addLoader('minifing', 'Minifing...');
+                            GS.ajaxJSON('/v1/postage/action_file', 'action=compile&mini=true' +
+                                                                  '&lib_name=' + strVersionFolder +
+                                                                  '&to_name=' + strToName, function (data, error) {
+                                GS.removeLoader('minifing');
+                                
+                                if (!error) {
+                                    GS.pushMessage('<center>GS library minified successfully.</center>', 1000);
+                                } else {
+                                    GS.ajaxErrorDialog(data);
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                // if we are at production
+                if (strSubdomain === (userData.default_domain || userData.default_subdomain)) {
+                    // if logged in as a superuser
+                    if (userData.superusername) {
+                        superNotLoggedInAtProduction();
+                        
+                    // else if we have developer permissions
+                    } else if (userData.groups.indexOf('developer_g') >= 0) {
+                        superLoggedInAtProduction();
+                        
+                    // else we are a normal user
+                    } else {
+                        normalUser();
+                    }
+                    
+                // else we are at development
+                } else {
+                    superLoggedInAtDevelopment();
+                }
+            });
+        </script>
+        
+        <style>
+            .section-container {
+                padding: 0.5em;
+            }
+            .section-title {
+                margin: 0.25em;
+            }
+            #status-container {
+                position: relative;
+                white-space: pre-wrap;
+                font-family: menlo, monospace;
+                font-size: 0.8em;
+            }
+            #link-status-warning {
+                text-align: center;
+                color: #888888;
+                font-size: 0.8em;
+            }
+            #developer-app-list-container a,
+            #user-app-list-container a {
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <template id="dialog-failed-release" data-theme="error">
+            <gs-page>
+                <gs-header><center><h3>Release Failed</h3></center></gs-header>
+                <gs-body padded>
+                    Release failed, please look at the part under "fossil commit --tag type-full".
+                    <br /><br />
+                    <div id="dialog-failed-release-info"></div>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose listen-for-return emphasis>Ok</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <template id="dialog-about">
+            <gs-page>
+                <gs-header><center><h3>About</h3></center></gs-header>
+                <gs-body padded>
+                    <gs-grid widths="1,1" reflow-at="767px">
+                        <gs-block>
+                            <center><h3><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a></h3></center>
+                        </gs-block>
+                        <gs-block>
+                            <center><h4 id="dialog-about-pg-version"></h4></center>
+                        </gs-block>
+                        <br />
+                        <gs-block>
+                            <center><h3><a target="_blank" href="http://olado.github.io/doT/">doT.js</a></h3></center>
+                        </gs-block>
+                        <gs-block>
+                            <center><h4 id="dialog-about-dot-version"></h4></center>
+                        </gs-block>
+                        <br />
+                        <gs-block>
+                            <center><h3><a target="_blank" href="http://ace.c9.io/">Ace Editor</a></h3></center>
+                        </gs-block>
+                        <gs-block>
+                            <center><h4>1.1.01</h4></center>
+                        </gs-block>
+                        <br />
+                        <gs-block>
+                            <center><h3><a target="_blank" href="http://jsbeautifier.org/">JSBeautifier</a></h3></center>
+                        </gs-block>
+                        <gs-block>
+                            <center><h4>Version Unknown</h4></center>
+                        </gs-block>
+                        <br />
+                        <gs-block>
+                            <center>
+                                <h3><a target="_blank" href="https://github.com/douglascrockford/JSON-js">
+                                    json_parse.js (modified)
+                                </a></h3>
+                            </center>
+                        </gs-block>
+                        <gs-block>
+                            <center><h4>Version Unknown</h4></center>
+                        </gs-block>
+                    </gs-grid>
+                </gs-body>
+                <gs-footer>
+                    <gs-button dialogclose>Ok</gs-button>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <template id="dialog-pull-error" data-theme="error">
+            <gs-page>
+                <gs-header><center><h3>Error</h3></center></gs-header>
+                <gs-body padded>
+                    There was an error see the text below:
+                    <br /><br />
+                    <pre id="dialog-pull-error-data"></pre>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose listen-for-return emphasis>Try Again</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <template id="dialog-release-message">
+            <gs-page>
+                <gs-header><center><h3>Release Message</h3></center></gs-header>
+                <gs-body padded>
+                    <label for="input-release-message">Please name your release:</label>
+                    <gs-text id="input-release-message"></gs-text>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose listen-for-return emphasis>Ok</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <template id="dialog-compile-choice">
+            <gs-page>
+                <gs-header><center><h3>Compile</h3></center></gs-header>
+                <gs-body padded>
+                    <label for="combo-compile">Greyspots Version Folder:</label>
+                    <gs-combo id="combo-compile" src="compile_list" action-select="postage/action_file">'
+                       <template>
+                           <table>
+                               <tbody><tr><td><gs-static column="id"></gs-static></td></tr></tbody>
+                           </table>
+                       </template>
+                    </gs-combo>
+                    <br />
+                    <label for="text-to-name">Name For The Resulting Files:</label>
+                    <gs-text id="text-to-name"></gs-text>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid width="1,1,1">
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button id="button-dialog-compile" dialogclose disabled>Compile</gs-button></gs-block>
+                        <gs-block><gs-button id="button-dialog-mini" dialogclose disabled>Minify</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <gs-page>
+            <gs-header>
+                <div flex-horizontal>
+                    <h3 class="title" flex>Home</h3>
+                    <gs-button id="button-logout-user" href="/v1/env/auth/?action=logout" title="Sign out" icononly icon="sign-out" iconrotatedown remove-right target="_self"></gs-button>
+                    <gs-button id="button-logout-super" href="/v1/postage/auth/?action=logout" title="Sign out of superuser" icononly icon="sign-out" iconrotatedown remove-right hidden target="_self"></gs-button>
+                    <gs-button onclick="window.location.reload(true);" title="Reload" icononly icon="refresh" remove-all></gs-button>
+                    <gs-button id="button-about" title="Credits" icononly icon="info-circle" remove-left></gs-button>
+                </div>
+            </gs-header>
+            <gs-body>
+                <div id="super-login-section-container" class="section-container" hidden>
+                    <gs-button id="button-login-super">Log in to superuser</gs-button>
+                </div>
+                <div id="version-control-section-container" class="section-container" hidden>
+                    <gs-grid widths="1,1,1">
+                        <gs-block><gs-button id="button-abandon" remove-bottom remove-right>Abandon</gs-button></gs-block>
+                        <gs-block><gs-button id="button-pull" remove-all>Pull</gs-button></gs-block>
+                        <gs-block><gs-button id="button-push" remove-bottom remove-left>Release</gs-button></gs-block>
+                    </gs-grid>
+                    <gs-button id="button-compile" remove-top>Compile GS Library</gs-button>
+                </div>
+                <gs-grid widths="1,1" reflow-at="767px">
+                    <gs-block id="developer-section-container" class="section-container" hidden>
+                        <h4 class="section-title">Develop:</h4>
+                        <br />
+                        <div id="developer-app-list-container">
+                            <gs-grid widths="1,1" reflow-at="767px">
+                                <gs-block>
+                                    <gs-button target="_blank" class="dev-link" href="/tools/postage/postage.html">Postage Development</gs-button>
+                                </gs-block>
+                                <gs-block>
+                                    <gs-button target="_blank" id="button-prod-postage">Postage Production</gs-button>
+                                </gs-block>
+                            </gs-grid>
+                            <gs-grid widths="1,1" reflow-at="767px">
+                                <gs-block>
+                                    <gs-button target="_blank" class="dev-link" href="/tools/csv/index.html">CSV Import/Export Development</gs-button>
+                                </gs-block>
+                                <gs-block>
+                                    <gs-button target="_blank" id="button-prod-csv">CSV Import/Export Production</gs-button>
+                                </gs-block>
+                            </gs-grid>
+                            <gs-button target="_blank" class="dev-link" href="/tools/postage/index.html">SQL Manager</gs-button>
+                            <gs-button target="_blank" class="dev-link" href="/tools/file_manager/file_manager.html">File Manager</gs-button>
+                            <gs-button target="_blank" class="dev-link" href="/tools/package_manager/index.html">Package Manager</gs-button>
+                            <gs-button target="_blank" class="dev-link" href="/tools/postal_inspector/index.html">Postal Inspector</gs-button>
+                            <gs-button target="_blank" class="dev-link" href="/documentation/index.html">Documentation</gs-button>
+                        </div>
+                    </gs-block>
+                    <gs-block id="user-section-container" class="section-container" hidden>
+                        <div flex-horizontal>
+                            <h4 class="section-title">Apps: </h4>
+                            <gs-combo id="combo-session-user" limit-to-list src="(SELECT 2 AS sort, pg_roles.oid::integer AS oid, rolname::text AS user_name     FROM pg_roles    WHERE rolcanlogin = 't' AND rolsuper = 'f' UNION    SELECT 1 AS sort, 0 AS oid, 'Production'::text AS user_name ORDER BY sort ASC, user_name ASC) ema" hidden flex>
+                                <template for="table">
+                                    <table>
+                                        <tbody>
+                                            <tr value="{{! row.oid }}">
+                                                <td>{{! row.user_name }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </template>
+                            </gs-combo>
+                        </div>
+                        <br />
+                        <div id="link-status-warning"></div>
+                        <div id="user-app-list-container">
+                            <gs-button target="_blank" data-user="joseph@wfprod.com" href="/v1/app/wiki_g/index.html?page_id=63250"><b>WORK TODO</b></gs-button>
+                            <gs-button target="_blank" data-user="joseph@wfprod.com" href="/v1/app/wiki_g/index.html?page_id=63243"><b>MENU</b></gs-button>
+                            <gs-button target="_blank" data-group="adr_g"     href="/v1/app/adr_g/index.html">Address Book</gs-button>
+                            <gs-button target="_blank" data-group="days_g"    href="/v1/app/days_g/ages.html">Ages</gs-button>
+                            <gs-button target="_blank" data-group="blog_g"    href="/v1/app/blog_g/index.html">Blog Edit</gs-button>
+                            <gs-button target="_blank" data-group="days_g"    href="/v1/app/days_g/index.html">Countdown</gs-button>
+                            <gs-button target="_blank" data-group="a8g_g"     href="/v1/app/a8g_g/index.html">EasyBooks</gs-button>
+                            <gs-button target="_blank"                        href="/v1/app/all/file_manager/file_manager.html">File Manager</gs-button>
+                            <gs-button target="_blank" data-group="school_g"  href="/v1/app/school_g/index.html">Learning App</gs-button>
+                            <gs-button target="_blank" data-group="school_g"  href="/v1/app/school_g/math.html">Learning Latin Math</gs-button>
+                            <gs-button target="_blank" data-group="lph_g"     href="/v1/app/lph_g/lph.html">LPH</gs-button>
+                            <gs-button target="_blank" data-group="meal_g"    href="/v1/app/meal_g/index.html">Meals</gs-button>
+                            <gs-button target="_blank" data-group="trkng_g"   href="/v1/app/trkng_g/index.html">Packages</gs-button>
+                            <gs-button target="_blank" data-group="pdf_g"     href="/v1/app/pdf_g/pdf_list.html">PDF Design</gs-button>
+                            <gs-button target="_blank" data-group="wiki_g"    href="/v1/app/wiki_g/random.html">Random Recipe</gs-button>
+                            <gs-button target="_blank" data-group="grocery_g" href="/v1/app/shop_g/index.html">TEMP</gs-button>
+                            <gs-button target="_blank" data-group="wtkv2_g"   href="/v1/app/wtkv2_g/index.html">Timekeeping</gs-button>
+                            <gs-button target="_blank" data-group="days_g"    href="/v1/app/days_g/toccical.html">TocciCal</gs-button>
+                            <gs-button target="_blank" data-group="trn_g"     href="/v1/app/trn_g/index.html">Turns</gs-button>
+                            <gs-button target="_blank" data-group="wiki_g"    href="/v1/app/wiki_g/index.html">Wiki</gs-button>
+                            
+                            <!--file/days_g/calendar-->
+                        </div>
+                    </gs-block>
+                </gs-grid>
+                <br />
+                <div id="status-section-container" class="section-container" hidden>
+                    <div flex-horizontal>
+                        <h4 class="section-title">Repo Status:</h4>
+                        <gs-button id="button-refresh-status" icononly icon="refresh"></gs-button>
+                    </div>
+                    <div id="status-container"></div>
+                </div>
+            </gs-body>
+            <gs-footer>
+                <center id="normal-user-name-label" hidden></center>
+            </gs-footer>
+        </gs-page>
+    </body>
+</html>

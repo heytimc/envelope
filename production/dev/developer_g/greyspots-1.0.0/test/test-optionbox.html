@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="/js/beautify.js" type="text/javascript"></script>
+        <script src="./ui-test.js"></script>
+        <link href="./ui-test.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><h1>Optionboxes:</h1></gs-header>
+            <gs-body padded>
+                <gs-optionbox>
+                    <gs-option value="0">Defcon 1</gs-option>
+                    <gs-option value="1">Defcon 2</gs-option>
+                    <gs-option value="2">Defcon 3</gs-option>
+                    <gs-option value="3">Defcon 4</gs-option>
+                    <gs-option value="4">Defcon 5</gs-option>
+                </gs-optionbox>
+                
+                <br />
+                <h3>Attributes</h3>
+                <gs-ui-test heading="column (sets what column it gets from gs-envelope or gs-form)"><br />
+                    <template>
+                        <gs-envelope src="test.tpeople" ord="first_name ASC" limit="2">
+                            <template for="table">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <th>{{! row_number }}</th>
+                                            <td>
+                                                <gs-optionbox id="testoptionbox0" column="last_name">
+                                                    <gs-option>Apple</gs-option>
+                                                    <gs-option>Cherry</gs-option>
+                                                </gs-optionbox>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </template>
+                        </gs-envelope>
+                    </template>
+                </gs-ui-test>
+                <gs-ui-test heading="value (sets value)"><br />
+                    <template>
+                        <gs-optionbox id="testoptionbox0" value="1">
+                            <gs-option value="0">test 1</gs-option>
+                            <gs-option value="1">test 2</gs-option>
+                            <gs-option value="2">test 3</gs-option>
+                        </gs-optionbox>
+                    </template>
+                </gs-ui-test>
+                
+                <br />
+                <h3>Events</h3>
+                <gs-ui-test heading="change: bubbles, cancelable (canceling has no effect, but is still useful)"><br />
+                    <template>
+                        <gs-optionbox id="testoptionbox1">
+                            <gs-option value="0">test 1</gs-option>
+                            <gs-option value="1">test 2</gs-option>
+                            <gs-option value="2">test 3</gs-option>
+                        </gs-optionbox>
+                    </template>
+                    <template>
+document.getElementById('testoptionbox1').addEventListener('change', function (event) {
+    event.preventDefault();
+});</template>
+                </gs-ui-test>
+                
+                <br />
+                <h3>Examples</h3>
+                <br />
+                <gs-ui-test heading="hidden value"><br />
+                    <template>
+                        <gs-optionbox id="testoptionbox2">
+                            <gs-option value="0">Defcon 1</gs-option>
+                            <gs-option value="1">Defcon 2</gs-option>
+                            <gs-option value="2">Defcon 3</gs-option>
+                            <gs-option value="3">Defcon 4</gs-option>
+                            <gs-option value="4">Defcon 5</gs-option>
+                        </gs-optionbox>
+                    </template>
+                </gs-ui-test>
+                
+                <br />
+                <gs-ui-test heading="hidden value, preset value"><br />
+                    <template>
+                        <gs-optionbox id="testoptionbox3" value="3">
+                            <gs-option value="0">Defcon 1</gs-option>
+                            <gs-option value="1">Defcon 2</gs-option>
+                            <gs-option value="2">Defcon 3</gs-option>
+                            <gs-option value="3">Defcon 4</gs-option>
+                            <gs-option value="4">Defcon 5</gs-option>
+                        </gs-optionbox>
+                    </template>
+                </gs-ui-test>
+                
+                <br />
+                <gs-ui-test heading="text value"><br />
+                    <template>
+                        <gs-optionbox id="testoptionbox4">
+                            <gs-option>Basketball</gs-option>
+                            <gs-option>Football (United States)</gs-option>
+                            <gs-option>Football (Europe)</gs-option>
+                            <gs-option>Racquetball</gs-option>
+                            <gs-option>Baseball</gs-option>
+                        </gs-optionbox>
+                    </template>
+                </gs-ui-test>
+                
+                <br />
+                <gs-ui-test heading="text value, preset value"><br />
+                    <template>
+                        <gs-optionbox id="testoptionbox5" value="Racquetball">
+                            <gs-option>Basketball</gs-option>
+                            <gs-option>Football (United States)</gs-option>
+                            <gs-option>Football (Europe)</gs-option>
+                            <gs-option>Racquetball</gs-option>
+                            <gs-option>Baseball</gs-option>
+                        </gs-optionbox>
+                    </template>
+                </gs-ui-test>
+                
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

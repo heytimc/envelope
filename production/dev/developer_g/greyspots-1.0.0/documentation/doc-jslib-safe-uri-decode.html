@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Safe URI Decoding Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>Safe URI Decoding Function</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Function:</b>
+                <div class="doc-section doc-mono">
+                    GS.safeDecodeURIComponent(...);
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    The GS.safeDecodeURIComponent runs the Javascript decodeURIComponent function but when it runs into a decoding error it just returns the string it was sent without any modifications. So if the string "asdf%26asdf" was sent than it would return "asdf&asdf" but if the string "asdf%z2asdf" was sent it would return the same string because "%z2" is not a valid URI code.
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>Skeleton Example:</b><br />
+                        When you click the "Safe" button the text of the first text control will be run through the GS.safeDecodeURIComponent function and put in the second text control. When you click the "Not Safe" button the text of the first text control will be run through the decodeURIComponent function and put in the second text control. If there is an error when decodeURIComponent is run than the error text will be put into the second text control.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="18">
+                            <gs-text id="text-to-convert" value="%z2"></gs-text>
+                            <gs-grid>
+                                <gs-block><gs-button onclick="testSafe()" remove-right>Safe</gs-button></gs-block>
+                                <gs-block><gs-button onclick="testUnsafe()" remove-left>Not Safe</gs-button></gs-block>
+                            </gs-grid>
+                            <gs-text id="text-converted"></gs-text>
+                        </template>
+                        <template for="js" height="18">
+                            function testSafe() {
+                                document.getElementById('text-converted').value = GS.safeDecodeURIComponent(document.getElementById('text-to-convert').value);
+                            }
+                            
+                            function testUnsafe() {
+                                try {
+                                    document.getElementById('text-converted').value = decodeURIComponent(document.getElementById('text-to-convert').value);
+                                } catch (e) {
+                                    document.getElementById('text-converted').value = e;
+                                }
+                            }
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

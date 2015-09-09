@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Postage Object Browser</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="postage-queries.js" type="text/javascript"></script>
+        <script src="postage.js" type="text/javascript"></script>
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        
+        <script>
+            var editor;
+            
+            function togglePlusAndMinus(elem, event) {
+                'use strict';
+                var plus = elem.querySelector('.plus'),
+                    minus = elem.querySelector('.minus');
+                if (event.target.nodeName.toLowerCase() !== 'gs-button') {
+                    plus.style.display === 'none'   ? plus.style.display = 'inline-block'   : plus.style.display = 'none';
+                    minus.style.display === 'none'  ? minus.style.display = 'inline-block'  : minus.style.display = 'none';
+                }
+            }
+            
+            function createLevel(intLevel, bolFirstOfLevel, strAttr, strHTML, strButtonHTML, bolFolder) {
+                'use strict';
+                var strRet = '<gs-grid ' + (bolFolder ? 'onclick="togglePlusAndMinus(this, event);"' : '') +
+                                    ' widths="35" class="object-row" data-level="' + intLevel + '">';
+                
+                if (intLevel > 1) {
+                    strRet += '<gs-block width="' + (intLevel - 1) + '">&nbsp;</gs-block>';
+                }
+                if (intLevel > 0) {
+                    strRet += '<gs-block width="1" class="object-spacer ' + (bolFirstOfLevel ? 'first-of-folder' : '') + '">&nbsp;</gs-block>';
+                }
+                
+                //console.log(intLevel, strHTML);
+                
+                if (strButtonHTML) {
+                    strRet += '<gs-block width="' + (31 - intLevel) + '" ' + strAttr + ' class="name-container">'
+                                + (bolFolder ? ''
+                                    + '<span class="plus" style="display: inline-block; width: 5px; height: 5px; border: 1px #000 solid; padding: 1px;">'
+                                    +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 1px 1px 0;"></div>' 
+                                    +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 0 1px 0;"></div>'
+                                    +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 1px 0 0;"></div>'
+                                    + '</span> '
+                                    + '<span class="minus" style="display: none; width: 5px; height: 5px; border: 1px #000 solid; padding: 1px;">'
+                                    +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 0 1px 0;"></div>' 
+                                    +   '<div style="float: left; width: 3px; height: 2px; border-color: #000; border-style: solid; border-width: 0 0 1px 0;"></div>'
+                                    + '</span> ' : ''
+                                ) + strHTML + '</gs-block>' +
+                              '<gs-block width="3" class="button-data-edit-container">' + strButtonHTML + '</gs-block>';
+                } else {
+                    strRet += '<gs-block width="' + (35 - intLevel) + '" ' + strAttr + ' class="name-container">'
+                                    + (bolFolder ? ''
+                                        + '<span class="plus" style="display: inline-block; width: 5px; height: 5px; border: 1px #000 solid; padding: 1px;">'
+                                        +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 1px 1px 0;"></div>' 
+                                        +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 0 1px 0;"></div>'
+                                        +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 1px 0 0;"></div>'
+                                        + '</span> '
+                                        + '<span class="minus" style="display: none; width: 5px; height: 5px; border: 1px #000 solid; padding: 1px;">'
+                                        +   '<div style="float: left; width: 2px; height: 2px; border-color: #000; border-style: solid; border-width: 0 0 1px 0;"></div>' 
+                                        +   '<div style="float: left; width: 3px; height: 2px; border-color: #000; border-style: solid; border-width: 0 0 1px 0;"></div>'
+                                        + '</span> ' : ''
+                                    ) + strHTML + '</gs-block>';
+                }
+                
+                strRet += '</gs-grid>';
+                
+                return strRet;
+            }
+            
+            window.addEventListener('load', function () {
+                GS.ajaxJSON('/v1/env/action_info', '', function (data, error) {
+                    window.userData = data.dat;
+                    GS.triggerEvent(window, 'user-data-loaded');
+                });
+            });
+            
+            window.addEventListener('user-data-loaded', function () {
+                document.getElementById('database-version').textContent = 'Postgres: ' + userData.postgres_version.split(' ')[1] +
+                                                                         ' DB: ' + userData.database_name +
+                                                                         ' Port: ' + userData.port;
+                
+                window.Range = require('ace/range').Range;
+                
+                //
+                editor = ace.edit('object-area');
+                
+                editor.setTheme('ace/theme/eclipse');
+                editor.getSession().setMode('ace/mode/sql');
+                editor.setShowPrintMargin(false);
+                editor.setDisplayIndentGuides(true);
+                editor.setShowFoldWidgets(false);
+                editor.session.setUseWrapMode('free');
+                editor.setBehavioursEnabled(false);
+                editor.$blockScrolling = Infinity; // <== blocks a warning
+                
+                if (evt.touchDevice) {
+                    editor.setOptions({
+                        maxLines: Infinity
+                    });
+                    
+                } else {
+                    document.getElementById('object-area').style.height = '100%';
+                }
+                
+                editor.resize(true);
+                editor.setReadOnly(true);
+                
+                document.getElementById('object-list-container').innerHTML =
+                                        createLevel(0, true, 'onclick="getSchemas(this)"', 'Schemas', '', true) +
+                                        createLevel(0, false, 'onclick="getGroups(this)"', 'Groups', '', true) +
+                                        createLevel(0, false, 'onclick="getRoles(this)"', 'Users', '', true) +
+                                        createLevel(0, false, 'onclick="getMore(this)"', 'More...', '', true);
+                
+                if (window.location.hostname.substring(0, window.location.hostname.indexOf('.')) === (userData.default_domain || userData.default_subdomain)) {
+                    document.getElementById('button-production-sql').removeAttribute('hidden');
+                }
+            });
+        </script>
+        
+        <style>
+            #container {
+                position: relative;
+            }
+            
+            #object-area {
+                height: 100%;
+                background-color: #DDDDDD;
+            }
+            
+            .button-obj-grid {
+                font-size: 0.7em;
+                border-radius: 0;
+            }
+            
+            #object-list-container .object-row:hover {
+                background-color: #DEDEDE;
+                cursor: default;
+            }
+        </style>
+    </head>
+    <body class="blue">
+        <template id="dialog-sql-dump">
+            <gs-page>
+                <gs-header>
+                    <center><h3>Schema Download</h3></center>
+                </gs-header>
+                <gs-body padded>
+                    <center>What code do you want for the schema: "<span id="dialog-sql-dump-schema"></span>"?</center>
+                    <div id="schema-dump-change-event-catcher">
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-drop-statements"></gs-checkbox>
+                            <label for="checkbox-schema-dump-drop-statements">Drop Statements</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-schema"></gs-checkbox>
+                            <label for="checkbox-schema-dump-schema">Schema</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-functions"></gs-checkbox>
+                            <label for="checkbox-schema-dump-functions">Functions</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-operators"></gs-checkbox>
+                            <label for="checkbox-schema-dump-operators">Operators</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-aggregates"></gs-checkbox>
+                            <label for="checkbox-schema-dump-aggregates">Aggregates</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-trigger-functions"></gs-checkbox>
+                            <label for="checkbox-schema-dump-trigger-functions">Trigger Functions</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-sequences"></gs-checkbox>
+                            <label for="checkbox-schema-dump-sequences">Sequences</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-tables"></gs-checkbox>
+                            <label for="checkbox-schema-dump-tables">Tables (Without Data)</label>
+                        </div>
+                        <div flex-horizontal>
+                            <gs-checkbox value="true" id="checkbox-schema-dump-views"></gs-checkbox>
+                            <label for="checkbox-schema-dump-views">Views</label>
+                        </div>
+                    </div>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button id="button-schema-dump" dialogclose>Download</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <gs-panel id="panel">
+            <gs-page id="left-bar" style="width: 20em;">
+                <gs-header><h3>Object Browser</h3></gs-header>
+                <gs-body>
+                    <div id="object-list-container"></div>
+                </gs-body>
+            </gs-page>
+            <gs-page>
+                <gs-header flex-horizontal>
+                    <gs-button icononly icon="arrow-right" hide-on-desktop></gs-button>
+                    <h3 flex id="database-version">&nbsp;</h3>
+                    <gs-button id="button-production-sql" href="production-sql.html" hidden>Enter A Query</gs-button>
+                </gs-header>
+                <gs-body id="container">
+                    <div id="object-area"></div>
+                </gs-body>
+            </gs-page>
+        </gs-panel>
+    </body>
+</html>

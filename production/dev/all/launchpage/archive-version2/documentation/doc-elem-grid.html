@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Grid Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>Grid</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Tag:</b>
+                <div class="doc-section doc-mono">
+                    &lt;gs-grid&gt;<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;gs-block&gt;...&lt;/gs-block&gt;<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;gs-block&gt;...&lt;/gs-block&gt;<br />
+                    &lt;/gs-grid&gt;
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    The gs-grid element is used to contain a set of gs-block elements for displaying tabular data. The gs-block elements are similar to cells in Excel and similar to &lt;td&gt; elements in HTML tables.<br /><br />
+                    
+                    The gs-grid element is used for setting the width of the gs-block columns. A grid with more blocks than columns will be broken into rows of blocks. When the page gets too thin the grid can make all of it's blocks 're-flow' to display one block per line.<br /><br />
+                    
+                    <b>When would you use a grid instead of a table?</b><br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;Generally, if you are displaying data, you want &lt;table&gt;. A table element attempts to resize it's columns to show each cell's content. It can also be configured to re-flow using CSS such that labels are repeated for each row. This way each field is identified in the current viewport. You need this when displaying tabular data. For example, ten columns of dates are useless if you don't have a label telling you which date is which.
+                    &nbsp;&nbsp;&nbsp;&nbsp;If you are not displaying tabular data, then you may want a gs-grid. A gs-grid gives you control of your column widths. In the case of layout, you  typically want to set your column widths and have them be respected so your layout looks correct. For example, a grid of buttons is a common use for gs-grid. If you set a gs-grid of buttons to re-flow on a narrow screen, they do not need additional labels. They'll look and work properly whether it re-flows or not.
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>Skeleton Example:</b>
+                        A basic gs-grid element with three blocks. Without attributes the grid will have the following behaviors:<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;1) All three blocks will be equal width.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;2) All three blocks will flow onto their own lines when the viewport is below a certain width.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <gs-grid>
+                                <gs-block class="doc-yellow">Block 1</gs-block>
+                                <gs-block class="doc-light-red">Block 2</gs-block>
+                                <gs-block class="doc-green">Block 3</gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Attribute "not-responsive":</b>
+                        A gs-grid element with the "not-responsive" attribute set and contains three blocks. This grid will have the following behaviors:<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;1) All three blocks will be equal width.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;2) No matter what the viewport width is the three blocks will not flow onto their own lines.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <gs-grid not-responsive>
+                                <gs-block class="doc-yellow">Block 1</gs-block>
+                                <gs-block class="doc-light-red">Block 2</gs-block>
+                                <gs-block class="doc-green">Block 3</gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Attribute "padded":</b><br />
+                        The padded attribute on a gs-grid adds a little padding between each column. The width of the grid is not affected and no padding is added before the first column or after the last column. The padded attribute is great for making elements like buttons have a little space between them so they don't look like they are touching.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <gs-grid padded>
+                                <gs-block class="doc-yellow">Block 1</gs-block>
+                                <gs-block class="doc-light-red">Block 2</gs-block>
+                                <gs-block class="doc-green">Block 3</gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Attribute "widths":</b><br />
+                        A gs-grid element with the "widths" attribute will set the widths of its columns. When setting the column widths, the gs-grid will total all the column values and divide each column by the total to get a percentage. In this example, the first column will be set to 20%, the second to 30% and the third to 50%.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <gs-grid widths="2,3,5">
+                                <gs-block class="doc-yellow">Block 1</gs-block>
+                                <gs-block class="doc-light-red">Block 2</gs-block>
+                                <gs-block class="doc-green">Block 3</gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Attribute "reflow-at":</b><br />
+                        In this example we have three gs-grid elements with the "reflow-at" attribute set. The value of the "reflow-at" attribute will determine at what window width the gs-grid element will put it's blocks in one vertical column.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="auto">
+                            <gs-grid reflow-at="400px">
+                                <gs-block class="doc-yellow">Grid 1, Block 1</gs-block>
+                                <gs-block class="doc-light-red">Grid 1, Block 2</gs-block>
+                                <gs-block class="doc-green">Grid 1, Block 3</gs-block>
+                            </gs-grid>
+                            <br />
+                            <gs-grid reflow-at="600px">
+                                <gs-block class="doc-yellow">Grid 2, Block 1</gs-block>
+                                <gs-block class="doc-light-red">Grid 2, Block 2</gs-block>
+                                <gs-block class="doc-green">Grid 2, Block 3</gs-block>
+                            </gs-grid>
+                            <br />
+                            <gs-grid reflow-at="800px">
+                                <gs-block class="doc-yellow">Grid 3, Block 1</gs-block>
+                                <gs-block class="doc-light-red">Grid 3, Block 2</gs-block>
+                                <gs-block class="doc-green">Grid 3, Block 3</gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Multiple Rows Example:</b><br />
+                        A gs-grid element with the "widths" attribute set for three blocks but it contains six blocks. The widths set in the "widths" attribute will be applied to the first three blocks and will be repeated on the second three blocks.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <gs-grid widths="1,2,3">
+                                <gs-block class="doc-yellow">Block 1</gs-block>
+                                <gs-block class="doc-light-red">Block 2</gs-block>
+                                <gs-block class="doc-green">Block 3</gs-block>
+                                <gs-block class="doc-yellow">Block 4</gs-block>
+                                <gs-block class="doc-light-red">Block 5</gs-block>
+                                <gs-block class="doc-green">Block 6</gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Setting a Block "width" Attribute:</b><br />
+                        A gs-grid element will use the "widths" attribute to set width attributes only on blocks that do not contain width attributes already. In this example, the fourth and fifth blocks have their "width" attributes pre-set.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <gs-grid widths="1,2,3">
+                                <gs-block class="doc-yellow">Block 1</gs-block>
+                                <gs-block class="doc-light-red">Block 2</gs-block>
+                                <gs-block class="doc-green">Block 3</gs-block>
+                                <gs-block width="2" class="doc-lavender">Block 4</gs-block>
+                                <gs-block width="4" class="doc-orange">Block 5</gs-block>
+                                <gs-block class="doc-yellow">Block 6</gs-block>
+                                <gs-block class="doc-light-red">Block 7</gs-block>
+                                <gs-block class="doc-green">Block 8</gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Button Example:</b><br />
+                        A gs-grid element with four blocks. Each contains a button with some or all of its corner rounding removed. In this example, gs-grid causes these buttons to look like a group.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <gs-grid>
+                                <gs-block>
+                                    <gs-button icononly icon="backward" remove-right></gs-button>
+                                </gs-block>
+                                <gs-block>
+                                    <gs-button icononly icon="pause" remove-all></gs-button>
+                                </gs-block>
+                                <gs-block>
+                                    <gs-button icononly icon="forward" remove-all></gs-button>
+                                </gs-block>
+                                <gs-block>
+                                    <gs-button icononly icon="volume-up" remove-left></gs-button>
+                                </gs-block>
+                            </gs-grid>
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

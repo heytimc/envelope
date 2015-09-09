@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>SQL Manager</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="sql.js" type="text/javascript"></script>
+        <link href="sql.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script>
+            var strCurrentPageLink,
+                bolCurrentlySaving = false,
+                bolSaveWaiting = false,
+                lastModified, editor,
+                bolAutoSave = true,
+                bolBlameMode = false,
+                currentSaveAjax,
+                intTimerID, testingWindow, intTimerWaiting;
+            
+            function clearEdit() {
+                document.getElementById('button-rename-selected').setAttribute('disabled', '');
+                document.getElementById('button-delete-selected').setAttribute('disabled', '');
+                document.getElementById('button-run').setAttribute('disabled', '');
+                document.getElementById('button-blame').setAttribute('disabled', '');
+                document.getElementById('button-history').setAttribute('disabled', '');
+                document.getElementById('area').setAttribute('disabled', '');
+                editor.setValue('');
+            }
+            
+            function fileHistory() {
+                'use strict';
+                GS.addLoader('history-load', 'Loading History...');
+                GS.ajaxJSON('/v1/postage/action_file', 'action=timeline&folder=sql' +
+                                                                   '&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                    var arrTimelineMatch, strTimelineMatch, strNumberOfVersions, strHTML, arrLine,
+                        arrDates = [], arrCurrentCommits = [], strCurrentDate, i, len, templateElement,
+                        strCommitId, strTime, strMessage, commit_i, commit_len;//, arrRaw = [];
+                    
+                    GS.removeLoader('history-load');
+                    
+                    if (!error) {
+                        arrTimelineMatch = data.dat.match(/\+\+\+ end of timeline \([0-9]*\) \+\+\+/gi);
+                        strTimelineMatch = arrTimelineMatch[arrTimelineMatch.length - 1];
+                        strNumberOfVersions = strTimelineMatch.substring('+++ end of timeline ('.length, strTimelineMatch.length - ') +++'.length);
+                        
+                        if (strNumberOfVersions !== '0') {
+                            
+                            arrLine = data.dat.split('\n');
+                            
+                            for (i = 0, len = arrLine.length; i < len; i += 1) {
+                                // date line (moskow)
+                                if (arrLine[i].substring(0, 3) === '===') { // wow, right?
+                                    if (strCurrentDate) {
+                                        arrDates.push({'date': strCurrentDate, 'commits': arrCurrentCommits});
+                                    }
+                                    strCurrentDate = arrLine[i].match(/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/)[0];
+                                    arrCurrentCommits = [];
+                                    
+                                // commit line
+                                } else if (arrLine[i].substring(0, 8).match(/..:..:../)) { // weird if statments
+                                    // keep square brackets
+                                    strCommitId = arrLine[i].match(/\[[a-z0-9]*\]/)[0];
+                                    strTime = arrLine[i].substring(0, 8);
+                                    strMessage = arrLine[i].substring(strTime.length + 1 + strCommitId.length + 1, arrLine[i].indexOf(' (user: ')).replace('*CURRENT* ', '');
+                                    
+                                    arrCurrentCommits.push({'commit_id': strCommitId, 'time': strTime, 'message': strMessage});
+                                    
+                                // number of versions line
+                                } else if (arrLine[i].substring(0, 3) === '+++') {
+                                    arrDates.push({'date': strCurrentDate, 'commits': arrCurrentCommits});
+                                }
+                            }
+                            
+                            arrDates.reverse();
+                            
+                            for (i = 0, len = arrDates.length, strHTML = ''; i < len; i += 1) {
+                                arrDates[i].commits.reverse();
+                                
+                                for (commit_i = 0, commit_len = arrDates[i].commits.length; commit_i < commit_len; commit_i += 1) {
+                                    strHTML +=  '<gs-button class="button-commit" commit-id="' + arrDates[i].commits[commit_i].commit_id + '">' +
+                                                    arrDates[i].date + ' ' +
+                                                    arrDates[i].commits[commit_i].time + ' ' +
+                                                    arrDates[i].commits[commit_i].message +
+                                                '</gs-button>\n';
+                                }
+                            }
+                            
+                            templateElement = document.createElement('template');
+                            
+                            templateElement.innerHTML = ml(function () {/*
+                                <gs-page>
+                                    <gs-header><center><h3>History</h3></center></gs-header>
+                                    <gs-body padded>
+                                        <div style="padding: 1em">{{HTML}}</div>
+                                    </gs-body>
+                                    <gs-footer><gs-button dialogclose>Done</gs-button></gs-footer>
+                                </gs-page>
+                            */}).replace('{{HTML}}', strHTML);
+                            
+                            GS.openDialog(templateElement, function () {
+                                var dialog = this, arrElement, i, len;
+                                
+                                arrElement = xtag.query(dialog, '.button-commit');
+                                
+                                for (i = 0, len = arrElement.length; i < len; i += 1) {
+                                    arrElement[i].addEventListener('click', function () {
+                                        fileOldCommit(this.getAttribute('commit-id'));
+                                    });
+                                }
+                            });
+                            
+                        } else {
+                            templateElement = document.createElement('template');
+                            
+                            templateElement.innerHTML = ml(function () {/*
+                                <gs-page>
+                                    <gs-header><center><h3>No History...</h3></center></gs-header>
+                                    <gs-body padded>
+                                        No history found for file: {{FILE}}
+                                    </gs-body>
+                                    <gs-footer><gs-button dialogclose>Done</gs-button></gs-footer>
+                                </gs-page>
+                            */}).replace('{{FILE}}', encodeHTML(strCurrentPageLink));
+                            
+                            GS.openDialog(templateElement);
+                        }
+                        
+                    } else {
+                        GS.ajaxErrorDialog(data, function () {
+                            fileHistory();
+                        });
+                    }
+                });
+            }
+            
+            function fileOldCommit(strCommitId) {
+                'use strict';
+                GS.addLoader('history-load', 'Loading History...');
+                
+                GS.ajaxJSON('/v1/postage/action_file', 'action=cat&folder=sql' +
+                                                                 '&path=' + encodeURIComponent(strCurrentPageLink) +
+                                                                 '&commit=' + strCommitId.replace(/[\[|\]]/g, ''), function (data, error) {
+                    var templateElement;
+                    
+                    GS.removeLoader('history-load');
+                    
+                    if (!error) {
+                        templateElement = document.createElement('template');
+                        templateElement.setAttribute('data-max-width', '2000px');
+                        templateElement.setAttribute('data-max-height', '2000px');
+                        
+                        templateElement.innerHTML = ml(function () {/*
+                            <gs-page>
+                                <gs-header><center><h3>Commit: {{COMMIT}}</h3></center></gs-header>
+                                <gs-body padded>
+                                    <pre class="selectable" style="font-size: 0.8em">{{TEXT}}</pre>
+                                </gs-body>
+                                <gs-footer><gs-button dialogclose>Done</gs-button></gs-footer>
+                            </gs-page>
+                        */}).replace('{{COMMIT}}', strCommitId).replace('{{TEXT}}', encodeHTML(data.dat));
+                        
+                        GS.openDialog(templateElement);
+                    } else {
+                        GS.ajaxErrorDialog(data, function () {
+                            fileOldCommit(strCommitId);
+                        });
+                    }
+                });
+            }
+            
+            function fileBlameToggle() {
+                'use strict';
+                if (bolBlameMode) {
+                    document.getElementById('area').removeAttribute('hidden');
+                    document.getElementById('blame').setAttribute('hidden', '');
+                    document.getElementById('button-blame').textContent = 'Blame';
+                    
+                } else {
+                    GS.addLoader('blame-load', 'Loading Blame Data...');
+                    GS.ajaxJSON('/v1/postage/action_file', 'action=blame&folder=sql' +
+                                                                       '&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                        if (!error) {
+                            document.getElementById('blame').removeAttribute('hidden');
+                            document.getElementById('area').setAttribute('hidden', '');
+                            document.getElementById('blame').textContent = data.dat;
+                            document.getElementById('button-blame').textContent = 'Edit';
+                            
+                        } else {
+                            GS.ajaxErrorDialog(data, function () {
+                                bolBlameMode = false;
+                                fileBlameToggle();
+                            });
+                        }
+                        GS.removeLoader('blame-load');
+                    });
+                }
+                
+                bolBlameMode = !bolBlameMode; // <== I wonder where I got that shortcut from, legitimately
+            }
+            
+            function insertNewFile() {
+                GS.openDialog('file-insert', function () {
+                    var dialog = this, fileNameControl = document.getElementById('postage-file-name');
+                    
+                    fileNameControl.focus();
+                    GS.setInputSelection(fileNameControl, '001_new_sql'.length);
+                },
+                function (event, strAnswer) {
+                    var dialog = this, strNewPathName;
+                    
+                    if (strAnswer === 'Create') {
+                        strNewPathName = xtag.query(dialog, '#postage-file-name')[0].value + '.' +
+                                        xtag.query(dialog, '#postage-file-type')[0].value;
+                        
+                        GS.addLoader('new-file-creation', 'Creating File...');
+                        GS.ajaxJSON('/v1/postage/action_file', 'action=write&folder=sql&content=' +
+                                                              '&path=' + strNewPathName, function (data, error) {
+                            GS.removeLoader('new-file-creation');
+                            if (!error) {
+                                strCurrentPageLink = strNewPathName;
+                                loadList();
+                                
+                            } else {
+                                GS.ajaxErrorDialog(data, function () {
+                                    insertNewFile(strNewPathName);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function renameSelectedFile(strStartPathName) {
+                GS.openDialog('file-rename', function () {
+                    document.getElementById('postage-file-name').value = strStartPathName || strCurrentPageLink;
+                },
+                function(event, strAnswer) {
+                    var strNewPathName;
+                    
+                    if (strAnswer === 'Rename') {
+                        strNewPathName = document.getElementById('postage-file-name').value.replace(/\//gi, '');
+                        
+                        GS.addLoader('file-rename', 'Renaming File...');
+                        GS.ajaxJSON('/v1/postage/action_file', 'action=mv_file&folder=sql' +
+                                                              '&paths_from=' + encodeURIComponent('["' + strCurrentPageLink + '"]') +
+                                                              '&paths_to=' + encodeURIComponent('["' + strNewPathName + '"]'),
+                                                              function (data, error) {
+                            GS.removeLoader('file-rename');
+                            if (!error) {
+                                strCurrentPageLink = strNewPathName;
+                                loadList();
+                                
+                            } else {
+                                GS.ajaxErrorDialog(data, function () {
+                                    renameSelectedFile(strNewPathName);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function deleteSelectedFile() {
+                GS.openDialog('file-delete', '', function (event, strAnswer) {
+                    if (strAnswer === 'Yes') {
+                        GS.addLoader('delete-file', 'Deleting File...');
+                        GS.ajaxJSON('/v1/postage/action_file', 'action=rm&folder=sql&paths=' +
+                                                                                        encodeURIComponent('["' + strCurrentPageLink + '"]'),
+                                                                                        function(data, error) {
+                            GS.removeLoader('delete-file');
+                            
+                            if (!error) {
+                                strCurrentPageLink = '';
+                                window.location.search = '';
+                                
+                            } else {
+                                GS.ajaxErrorDialog(data, function() {
+                                    deleteSelectedFile();
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function loadList() {
+                'use strict';
+                GS.addLoader(document.getElementById('file-list-container'), 'Loading...<br />Please Wait.');
+                GS.ajaxJSON('/v1/postage/action_file', 'action=list&folder=sql&path=', function (data, error) {
+                    var i, len, html = '';
+                    
+                    GS.removeLoader(document.getElementById('file-list-container'));
+                    
+                    if (!error) {
+                        //data.dat.files = [];
+                        
+                        if (data.dat.files.length === 0) {
+                            clearEdit();
+                            document.getElementById('file-list-container').innerHTML =
+                                    '<center>' +
+                                        '<span class="hint">' +
+                                            'You have no files at this time.<br />' +
+                                            'Please click: "New File" to add a new file...' +
+                                        '</span>' +
+                                    '</center>';
+                            
+                        } else {
+                            data.dat.files.sort();
+                            
+                            if (!strCurrentPageLink) {
+                                strCurrentPageLink = data.dat.files[0];
+                            }
+                            
+                            for (i = 0, len = data.dat.files.length; i < len; i += 1) {
+                                //html += '<gs-button remove-all data-link="' + encodeHTML(data.dat.files[i]) + '"' +
+                                //                  ' href="?file=' + encodeHTML(data.dat.files[i]) + '"' +
+                                //                  (data.dat.files[i] === strCurrentPageLink ? ' selected' : '') + ' target="_self">' +
+                                //            encodeHTML(data.dat.files[i]) +
+                                //        '</gs-button>';
+                                
+                                //console.log(data.dat.files[i] === strCurrentPageLink, data.dat.files[i], strCurrentPageLink);
+                                
+                                html += '<gs-button target="_self" href="index.html?' +
+                                                    'file=' + encodeHTML(data.dat.files[i]) +
+                                                    '&cursorstartrow=&cursorendrow=&cursorstartcol=&cursorendcol=&scroll="' +
+                                                    (data.dat.files[i] === strCurrentPageLink ? ' selected' : '') + '>' +
+                                            encodeHTML(data.dat.files[i]) +
+                                        '</gs-button>\n\n';
+                            }
+                            
+                            document.getElementById('file-list-container').innerHTML = html;
+                            
+                            if (strCurrentPageLink) {
+                                loadFile(strCurrentPageLink);
+                            }
+                            
+                            // scroll selected file into view
+                            GS.scrollIntoView(xtag.queryChildren(document.getElementById('file-list-container'), 'gs-button[selected]')[0]);
+                        }
+                    } else {
+                        GS.ajaxErrorDialog(data, function() {
+                            refreshFileList();
+                        });
+                    }
+                });
+            }
+            
+            function loadFile(strFileName) {
+                var element, strQueryString = GS.getQueryString();
+                
+                //console.log(GS.qryGetVal(strQueryString, 'file'),
+                //            strFileName,
+                //            GS.qryGetVal(strQueryString, 'cursorendcol'),
+                //            GS.qryGetVal(strQueryString, 'scroll'));
+                
+                //console.log('reset');
+                //editor.getSession().getUndoManager().reset();
+                
+                //if (GS.qryGetVal(strQueryString, 'file') &&
+                //    GS.qryGetVal(strQueryString, 'file') !== strFileName //&&
+                //        //(
+                //        //    GS.qryGetVal(strQueryString, 'cursorendcol') ||
+                //        //    GS.qryGetVal(strQueryString, 'scroll')
+                //        //)
+                //    ) {
+                //    //GS.pushQueryString('cursorstartrow=&cursorendrow=&cursorstartcol=&cursorendcol=&scroll=');
+                //    
+                //    window.location.search = 'file=' + strFileName + '&cursorstartrow=&cursorendrow=&cursorstartcol=&cursorendcol=&scroll=';
+                //    //GS.pushQueryString('file=' + strFileName + '&cursorstartrow=&cursorendrow=&cursorstartcol=&cursorendcol=&scroll=');
+                //    
+                //    //strQueryString = GS.qrySetVal(strQueryString, 'cursorstartrow=');
+                //    //strQueryString = GS.qrySetVal(strQueryString, 'cursorendrow=');
+                //    //strQueryString = GS.qrySetVal(strQueryString, 'cursorstartcol=');
+                //    //strQueryString = GS.qrySetVal(strQueryString, 'cursorendcol=');
+                //    //strQueryString = GS.qrySetVal(strQueryString, 'scroll=');
+                //    
+                //    //history.replaceState({}, document.title, 'index.html?' + strQueryString);
+                //    
+                //} else
+                if (!GS.qryGetVal(strQueryString, 'file')) {
+                    GS.replaceState('index.html?' + 'file=' + strFileName + '&cursorstartrow=&cursorendrow=&cursorstartcol=&cursorendcol=&scroll=');
+                }
+                
+                //console.log(strFileName);
+                strCurrentPageLink = strFileName;
+                if (bolBlameMode) {
+                    fileBlameToggle();
+                }
+                
+                //element = document.querySelector('#file-list-container > [selected]');
+                //if (element) {
+                //    element.removeAttribute('selected');
+                //}
+                //
+                //element = document.querySelector('#file-list-container > [data-link="' + strCurrentPageLink + '"]');
+                //if (element) {
+                //    element.setAttribute('selected', '');
+                //}
+                
+                document.getElementById('button-rename-selected').removeAttribute('disabled');
+                document.getElementById('button-delete-selected').removeAttribute('disabled');
+                document.getElementById('button-run').removeAttribute('disabled');
+                document.getElementById('button-blame').removeAttribute('disabled');
+                document.getElementById('button-history').removeAttribute('disabled');
+                document.getElementById('area').removeAttribute('disabled');
+                
+                GS.addLoader(document.getElementById('container'), 'Loading File...');
+                GS.ajaxJSON('/v1/postage/action_file', 'action=read&folder=sql&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                    GS.removeLoader(document.getElementById('container'));
+                    
+                    if (!error) {
+                        lastModified = data.dat.date;
+                        
+                        editor.setValue(data.dat.content);
+                        
+                        editor.resize(true);
+                        editor.focus();
+                        editor.selection.setSelectionRange(new Range(0, 0, 0, 0));
+                        
+                        useQueryString();
+                        
+                        // reset undo stack so that we can't undo to previous files
+                        setTimeout(function () {
+                        //editor.addEventListener('change', function () {
+                            editor.getSession().getUndoManager().reset();
+                        //    
+                        //    //editor.removeEventListener('change', arguments.callee);
+                        //});
+                        }, 1);
+                        //editor.getSession().getUndoManager().$undoStack = [];
+                        //editor.getSession().getUndoManager().$redoStack = [];
+                        //editor.getSession().getUndoManager().dirtyCounter = 0;
+                        
+                    } else {
+                        GS.ajaxErrorDialog(data, function () {
+                            loadFile(strFileName);
+                        });
+                    }
+                });
+            }
+            
+            function saveFile(bolLoader) {
+                var aceIndicator = document.getElementById('ace-indicator');
+                
+                if (bolCurrentlySaving === false) {
+                    bolCurrentlySaving = true;
+                    
+                    if (bolLoader) {
+                        GS.addLoader('file-save', 'Saving...');
+                    }
+                    
+                    aceIndicator.removeAttribute('hidden');
+                    aceIndicator.textContent = 'Saving...';
+                    aceIndicator.classList.remove('indicator-error');
+                    
+                    currentSaveAjax = GS.ajaxJSON('/v1/postage/action_file', 'action=write' +
+                                                                            '&folder=sql' +
+                                                                            '&path=' + encodeURIComponent(strCurrentPageLink) +
+                                                                            '&change_stamp=' + encodeURIComponent(lastModified) +
+                                                                            '&content=' + encodeURIComponent(editor.getValue()), function(data, error) {
+                            
+                            aceIndicator.setAttribute('hidden', '');
+                            if (bolLoader) {
+                                GS.removeLoader('file-save');
+                            }
+                            
+                            if (!error) {
+                                saveQueryString('cursor');
+                                lastModified = data.dat;
+                                
+                                if (!bolAutoSave) {
+                                    bolAutoSave = true;
+                                    GS.pushMessage('Auto-saving has been turned on.', 1000);
+                                }
+
+                                bolCurrentlySaving = false;
+                                if (bolSaveWaiting) {
+                                    bolSaveWaiting = false;
+                                    saveFile();
+                                }
+                                
+                                //history.replaceState({}, document.title, 'index.html?file=' + strCurrentPageLink + '&scroll=' + + '&cursor=' + );
+                                
+                            } else {
+                                bolSaveWaiting = false;
+                                bolCurrentlySaving = false;
+                                bolAutoSave = false;
+                                aceIndicator.removeAttribute('hidden');
+                                aceIndicator.innerHTML = 'CHANGES ARE NOT SAVED<br />CLICK HERE TO TRY AGAIN';
+                                aceIndicator.classList.add('indicator-error');
+                                
+                                data.error_hint = 'Auto-saving has been turned off.\n' +
+                                                  'Please save a copy of this code locally so that you do not lose your changes.\n\n' +
+                                                  'Click "Cancel" to continue editing. Click "Try Again" to attempt another save.';
+                                
+                                GS.ajaxErrorDialog(data, function() {
+                                    saveFile(true);
+                                });
+                            }
+                        });
+                } else {
+                    bolSaveWaiting = true;
+                }
+            }
+            
+            function pullData() {
+                document.body.classList.remove('results-show');
+                editor.resize();
+                
+                GS.addLoader('pull', 'Pulling...');
+                GS.ajaxJSON('/v1/postage/action_fossil', 'action=test', function(data, error) {
+                    var arr_added, arr_edited, arr_deleted, int_added, int_edited, int_deleted;
+                    
+                    GS.removeLoader('pull');
+                    editor.getSession().setAnnotations([]);
+                    
+                    if (!error) {
+                        arr_added   = data.dat.match(  /ADDED/gm);
+                        arr_edited  = data.dat.match( /EDITED/gm);
+                        arr_deleted = data.dat.match(/DELETED/gm);
+                        int_added   = arr_added   ? arr_added.length   : 0; 
+                        int_edited  = arr_edited  ? arr_edited.length  : 0; 
+                        int_deleted = arr_deleted ? arr_deleted.length : 0;
+                        
+                        GS.pushMessage(int_added + ' Added, ' + int_edited  + ' Edited, ' + int_deleted + ' Deleted', 2000);
+                        
+                    } else {
+                        GS.ajaxErrorDialog(data, function() {
+                            pullData();
+                        }, function () {
+                            if (data.error_file) {
+                                window.location.search = 'file=' + data.error_file +
+                                                         '&cursorstartrow=&cursorendrow=&cursorstartcol=&cursorendcol=&scroll=';
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function saveQueryString(strMode) {
+                var editorSelectionRange = editor.getSelectionRange(), strQueryString = GS.getQueryString();
+                
+                //console.trace('test');
+                
+                if (strMode === 'cursor') {
+                    strQueryString = GS.qrySetVal(strQueryString, 'cursorstartrow=' + editorSelectionRange.start.row);
+                    strQueryString = GS.qrySetVal(strQueryString, 'cursorendrow='   + editorSelectionRange.end.row);
+                    strQueryString = GS.qrySetVal(strQueryString, 'cursorstartcol=' + editorSelectionRange.start.column);
+                    strQueryString = GS.qrySetVal(strQueryString, 'cursorendcol='   + editorSelectionRange.end.column);
+                }
+                if (strMode === 'scroll') {
+                    strQueryString = GS.qrySetVal(strQueryString, 'scroll='         + editor.session.getScrollTop());
+                }
+                
+                history.replaceState({}, document.title, 'index.html?' + strQueryString);
+                //history.replaceState({}, document.title, 'index.html?file=' + strCurrentPageLink);
+            }
+            
+            function useQueryString() {
+                var strQueryString = GS.getQueryString();
+                
+                //console.log('popHandler');
+                
+                editor.getSelection().setSelectionRange(new Range(
+                    GS.qryGetVal(strQueryString, 'cursorstartrow'),
+                    GS.qryGetVal(strQueryString, 'cursorstartcol'),
+                    GS.qryGetVal(strQueryString, 'cursorendrow'),
+                    GS.qryGetVal(strQueryString, 'cursorendcol')
+                ));
+                
+                editor.session.setScrollTop(parseInt(GS.qryGetVal(strQueryString, 'scroll'), 10));
+            }
+            
+            //window.addEventListener('pushstate', pushReplacePopHandler);
+            //window.addEventListener('replacestate', pushReplacePopHandler);
+            /*window.addEventListener('popstate', function () { //useQueryString
+                loadFile(GS.qryGetVal(GS.getQueryString(), 'file'));
+            });*/
+            
+            //window.addEventListener('pushstate', function () {
+            //    console.log('1***    PUSH', GS.getQueryString());
+            //});
+            //window.addEventListener('replacestate', function () {
+            //    console.log('2*** REPLACE', GS.getQueryString());
+            //});
+            //window.addEventListener('popstate', function () {
+            //    console.log('3***     POP', GS.getQueryString());
+            //});
+            
+            window.addEventListener('load', function () {
+                GS.ajaxJSON('/v1/env/action_info', '', function (data, error) {
+                    window.userData = data.dat;
+                    GS.triggerEvent(window, 'user-data-loaded');
+                });
+            });
+            
+            window.addEventListener('user-data-loaded', function () {
+                var strQueryString = GS.getQueryString();
+                
+                if (GS.qryGetVal(strQueryString, 'file')) {
+                    strCurrentPageLink = GS.qryGetVal(strQueryString, 'file');
+                }
+                
+                document.getElementById('database-version').textContent = 'Postgres: ' + userData.postgres_version.split(' ')[1] +
+                                                                         ' DB: ' + userData.database_name +
+                                                                         ' Port: ' + userData.port;
+                
+                //window.ScrollBar = require('ace/scrollbar').ScrollBar;
+                window.Range = require('ace/range').Range;
+                window.snippetManager = require('ace/snippets').snippetManager;
+                window.UndoManager = require('ace/undomanager').UndoManager;
+                window.EditSession = ace.require("ace/edit_session").EditSession;
+                
+                //
+                editor = ace.edit('area');
+                
+                editor.setTheme('ace/theme/eclipse');
+                editor.getSession().setMode('ace/mode/pgsql');
+                editor.setShowPrintMargin(false);
+                editor.setDisplayIndentGuides(true);
+                editor.setShowFoldWidgets(false);
+                editor.session.setUseWrapMode('free');
+                editor.setBehavioursEnabled(false);
+                editor.$blockScrolling = Infinity; // <== blocks a warning
+                
+                editor.setOptions({
+                    'enableBasicAutocompletion': true,
+                    'enableSnippets'           : true,
+                    'enableLiveAutocompletion' : true
+                });
+                
+                if (evt.touchDevice) {
+                    editor.setOptions({
+                        maxLines: Infinity
+                    });
+                    
+                } else {
+                    document.getElementById('area').style.height = '100%';
+                }
+                
+                editor.resize(true);
+                
+                //editor.replace = function(replacement, options) {
+                //    if (options)
+                //        this.$search.set(options);
+                //    var range = this.$search.find(this.session);
+                //    var replaced = 0;
+                //    if (!range)
+                //        return replaced;
+                //    if (this.$tryReplace(range, replacement)) {
+                //        replaced = 1;
+                //    }
+                //    if (range !== null) {
+                //        this.selection.setSelectionRange(range);
+                //        this.renderer.scrollSelectionIntoView(range.start, range.end);
+                //    }
+                //    if (bolAutoSave) {
+                //        clearTimeout(intTimerID);
+                //        intTimerWaiting = true;
+                //        intTimerID = setTimeout(function() {
+                //            saveFile();
+                //            intTimerWaiting = false;
+                //        }, 300);
+                //    }
+                //    return replaced;
+                //};
+                //
+                //editor.replaceAll = function(replacement, options) {
+                //    if (options) {
+                //        this.$search.set(options);
+                //    }
+                //    var ranges = this.$search.findAll(this.session);
+                //    var replaced = 0;
+                //    if (!ranges.length)
+                //        return replaced;
+                //    this.$blockScrolling += 1;
+                //    var selection = this.getSelectionRange();
+                //    this.selection.moveTo(0, 0);
+                //    for (var i = ranges.length - 1; i >= 0; --i) {
+                //        if(this.$tryReplace(ranges[i], replacement)) {
+                //            replaced++;
+                //        }
+                //    }
+                //    this.selection.setSelectionRange(selection);
+                //    this.$blockScrolling -= 1;
+                //    if (bolAutoSave) {
+                //        clearTimeout(intTimerID);
+                //        intTimerWaiting = true;
+                //        intTimerID = setTimeout(function() {
+                //            saveFile();
+                //            intTimerWaiting = false;
+                //        }, 300);
+                //    }
+                //    return replaced;
+                //};
+                
+                ////.getElementById('area')
+                //document.addEventListener('keydown', function (event) {
+                //    var intKeyCode = event.which || event.keyCode;
+                //    
+                //    console.log('Down:', intKeyCode);
+                //    
+                //    //if (intKeyCode === 82 && event.metaKey) {
+                //    //    
+                //    //} else
+                //    if (intKeyCode === 83 && event.metaKey) {
+                //        event.preventDefault();
+                //        clearTimeout(intTimerID);
+                //        saveFile(true);
+                //    } else if (bolAutoSave) { //  && intKeyCode !== 17 && intKeyCode !== 91 && intKeyCode !== 93
+                //        clearTimeout(intTimerID);
+                //        intTimerWaiting = true;
+                //        intTimerID = setTimeout(function() {
+                //            saveFile();
+                //            intTimerWaiting = false;
+                //        }, 300);
+                //    }
+                //});
+                //
+                ////
+                //document.getElementById('area').addEventListener('keyup', function (event) {
+                //    var intKeyCode = event.which || event.keyCode;
+                //    
+                //    console.log('Up:  ', intKeyCode);
+                //    
+                //    if ((intKeyCode === 8 || intKeyCode === 9 || intKeyCode === 13 || intKeyCode === 32 || intKeyCode === 46) && bolAutoSave) {
+                //        clearTimeout(intTimerID);
+                //        intTimerWaiting = true;
+                //        intTimerID = setTimeout(function() {
+                //            saveFile();
+                //            intTimerWaiting = false;
+                //        }, 300);
+                //    }
+                //});
+                
+                document.addEventListener('keydown', function (event) {
+                    if ((event.which || event.keyCode) === 83 && event.metaKey) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        clearTimeout(intTimerID);
+                        saveFile(true);
+                        intTimerWaiting = false;
+                    }
+                });
+                
+                editor.addEventListener('change', function (event) {
+                    clearTimeout(intTimerID);
+                    intTimerWaiting = true;
+                    intTimerID = setTimeout(function() {
+                        saveFile();
+                        intTimerWaiting = false;
+                    }, 300);
+                });
+                
+                //
+                document.getElementById('ace-indicator').addEventListener('click', function () {
+                    saveFile(true);
+                });
+                
+                //useQueryString();
+                
+                editor.session.addEventListener('changeScrollTop', function () {
+                    saveQueryString('scroll');
+                });
+                
+                // ######################################################################
+                // ############################ PULL  BUTTON ############################
+                // ######################################################################
+                
+                //
+                document.body.addEventListener('keydown', function (event) {
+                    var intKeyCode = event.which || event.keyCode;
+                    
+                    //console.log(intKeyCode);
+                    
+                    if (intKeyCode === 116) {
+                        event.preventDefault();
+                        runSQL();
+                    }
+                });
+                
+                loadList();
+                
+                document.getElementById('button-search').setAttribute('href', '/v1/dev/developer_g/greyspots-' + GS.version() + '/tools/search/index.html?folder=sql');
+                
+                
+                window.onbeforeunload = function () {
+                    //if (bolCurrentlySaving || bolSaveWaiting || intTimerWaiting) {
+                    //    return 'This file has not finished saving.';
+                    //}
+                };
+            });
+        </script>
+        <style>
+            #blame {
+                height: 100%;
+                white-space: pre-wrap;
+                overflow: auto;
+                font-family: menlo, monospace;
+            }
+            
+            #ace-indicator {
+                position: absolute;
+                right: 2em;
+                top: 0.2em;
+                
+                z-index: 50;
+            }
+            
+            #ace-indicator.indicator-error {
+                border: 2px dashed #000000;
+                background-color: #FF5555;
+                padding: 0.2em;
+                right: 1em;
+            }
+            
+            
+            /* ########################################################### */
+            /* ######################## FILE LIST ######################## */
+            /* ########################################################### */
+            #file-list-container {
+                position: relative;
+            }
+            
+            #file-list-container a {
+                text-decoration: none;
+            }
+            #file-list-container gs-button {
+                text-align: left;
+                font-size: 0.8em;
+            }
+        </style>
+    </head>
+    <body class="blue">
+        <template id="file-insert">
+            <gs-page>
+                <gs-header><center><h3>New SQL File</h3></center></gs-header>
+                <gs-body padded>
+                    <label for="postage-file-name">File name:</label>
+                    <gs-text id="postage-file-name" type="text" value="001_new_sql"></gs-text>
+                    <br />
+                    <label for="postage-file-type">File Type:</label>
+                    <gs-select id="postage-file-type">
+                        <option value="sql">Persistent Script</option>
+                        <option value="once">Single use script</option>
+                    </gs-select>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose listen-for-return>Create</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        <template id="file-rename">
+            <gs-page>
+                <gs-header><center><h3>Rename SQL File</h3></center></gs-header>
+                <gs-body padded>
+                    <label for="postage-file-name">File name:</label>
+                    <gs-text id="postage-file-name"></gs-text>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose listen-for-return>Rename</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        <template id="file-delete">
+            <gs-page>
+                <gs-header><center><h3>Are You Sure...</h3></center></gs-header>
+                <gs-body padded>
+                    <center>Are you sure you want to delete this file?</center>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>No</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose>Yes</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <gs-panel id="panel">
+            <gs-page id="left-bar" style="width: 18em;">
+                <gs-header>
+                    <div flex-horizontal>
+                        <span flex></span>
+                        <gs-button onclick="GS.pushQueryString('panel.left-bar=hide');" icononly icon="arrow-left" hide-on-desktop></gs-button>
+                    </div>
+                    <gs-button onclick="insertNewFile();">New File</gs-button>
+                    <gs-grid>
+                        <gs-block>
+                            <gs-button id="button-rename-selected" onclick="renameSelectedFile();" disabled>Rename File</gs-button>
+                        </gs-block>
+                        <gs-block>
+                            <gs-button id="button-delete-selected" onclick="deleteSelectedFile();" disabled>Delete File</gs-button>
+                        </gs-block>
+                    </gs-grid>
+                </gs-header>
+                <gs-body id="file-list-container"></gs-body>
+            </gs-page>
+            <gs-page>
+                <gs-header>
+                    <div flex-horizontal>
+                        <gs-button onclick="GS.pushQueryString('panel.left-bar=show');" icononly icon="arrow-right" hide-on-desktop></gs-button>
+                        <h3 id="database-version" flex>&nbsp;</h3>
+                        <gs-button id="button-run" disabled onclick="runSQL();" icononly icon="play" remove-right></gs-button>
+                        <gs-button id="button-blame" disabled onclick="fileBlameToggle();" remove-all>Blame</gs-button>
+                        <gs-button id="button-history" disabled onclick="fileHistory();" remove-all>History</gs-button>
+                        <gs-button id="button-pull" onclick="pullData();" remove-all>Pull</gs-button>
+                        <gs-button id="button-search" remove-left icononly icon="search"></gs-button>
+                    </div>
+                    <gs-button onclick="dialogProcess()">Process Manager</gs-button>
+                </gs-header>
+                <gs-body id="container">
+                    <div id="ace-indicator"></div>
+                    <div id="blame" hidden></div>
+                    <div id="area" disabled></div>
+                </gs-body>
+            </gs-page>
+        </gs-panel>
+        <div id="results-pane" flex-vertical flex-fill>
+            <div flex-horizontal>
+                <h4 id="results-title" flex></h4>
+                <gs-button id="button-drawer-height-small" onclick="setDrawerHeight('small');" remove-right><b>_</b></gs-button>
+                <gs-button id="button-drawer-height-half" onclick="setDrawerHeight('half');" remove-all>&#9604;</gs-button>
+                <gs-button id="button-drawer-height-full" onclick="setDrawerHeight('full');" remove-all>&#9608;</gs-button>
+                <gs-button icononly icon="times" onclick="document.body.classList.remove('results-show'); editor.resize();" remove-left></gs-button>
+            </div>
+            <div id="results" flex></div>
+        </div>
+    </body>
+</html>

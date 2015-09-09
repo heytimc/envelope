@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Install</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="resources/launch.js" type="text/javascript"></script>
+        <link href="resources/launch.css" type="text/css" rel="stylesheet" />
+        
+        <script>
+            function purchase(strItem) {
+                if (strItem === 'binary') {
+                    // after checkout: https://www.envelope.xyz/binary/finish.html
+                    GS.dialog({
+                        'header': 'Binary Download',
+                        'content':  ml(function () {/*
+                                        <br />
+                                        <gs-grid widths="1,1">
+                                            <gs-block><br /><center>Envelope Binary ($39)</center></gs-block>
+                                            <gs-block>
+                                                <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                    <input type="hidden" name="cmd" value="_s-xclick">
+                                                    <input type="hidden" name="hosted_button_id" value="M4938XTXK8HYW">
+                                                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                                </form>
+                                            </gs-block>
+                                        </gs-grid>
+                                        <br />
+                                    */})
+                    });
+                } else if (strItem === 'cloud') {
+                    // after checkout: https://www.envelope.xyz/cloud/finish.html
+                    GS.dialog({
+                        'header': 'Standard Performance Cloud',
+                        'content': ml(function () {/*
+                                    <br />
+                                    <gs-grid>
+                                        <gs-block><br /><center>Envelope for: Cloud ($99 / Per Month)</center></gs-block>
+                                        <gs-block>
+                                            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                <input type="hidden" name="cmd" value="_s-xclick">
+                                                <input type="hidden" name="hosted_button_id" value="F82WMP8GNM2WQ">
+                                                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribe_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                            </form>
+                                        </gs-block>
+                                    </gs-grid>
+                                    <br />
+                                */})
+                    });
+                } else if (strItem === 'onsite') {
+                    // after checkout: https://www.envelope.xyz/server/finish.html
+                    GS.dialog({
+                        'header': 'Onsite Server',
+                        'content': ml(function () {/*
+                                    <br />
+                                    <gs-grid>
+                                        <gs-block><br /><center>Envelope and Intel NUC ($999)</center></gs-block>
+                                        <gs-block>
+                                            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                <input type="hidden" name="cmd" value="_s-xclick">
+                                                <input type="hidden" name="hosted_button_id" value="FGVKUBNTQHBKY">
+                                                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                            </form>
+                                        </gs-block>
+                                    </gs-grid>
+                                    <br />
+                                */})
+                    });
+                } else if (strItem === 'high-perf-cloud') {
+                    // after checkout: https://www.envelope.xyz/cloud/finish.html?performance=high
+                    GS.dialog({
+                        'header': 'High Performance Cloud',
+                        'content': ml(function () {/*
+                                    <br />
+                                    <gs-grid>
+                                        <gs-block><br /><center>Envelope for: High Performance Cloud ($199 / Per Month)</center></gs-block>
+                                        <gs-block>
+                                            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                <input type="hidden" name="cmd" value="_s-xclick">
+                                                <input type="hidden" name="hosted_button_id" value="BBFKV3VYDG8CG">
+                                                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribe_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                            </form>
+                                        </gs-block>
+                                    </gs-grid>
+                                    <br />
+*/})
+                    });
+                }
+            }
+        </script>
+        
+        <style>
+            .option-body {
+                height: 9.6875em;
+                
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                -ms-box-sizing: border-box;
+                -o-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body>
+        <gs-page>
+            <gs-header>
+                <div class="header-row green">
+                    <h2 class="row-title centered">Workflow Products, L.L.C.</h2>
+                </div>
+                <div class="header-row lighter-green">
+                    <h2 class="row-title">Envelope Server</h2>
+                    <div class="link-container">
+                        <a class="row-link" target="_self" href="index.html">Overview</a>
+                        <a class="row-link current" target="_self" href="install.html">Install</a>
+                        <a class="row-link" target="_self" href="support.html">Support</a>
+                    </div>
+                </div>
+            </gs-header>
+            <gs-body padded>
+                <gs-grid padded reflow-at="1000px">
+                    <gs-block>
+                        <div class="option-container">
+                            <div class="option-name">Binary Download</div>
+                            <div class="option-body">
+                                Download and install it on your own server.
+                                <br /><br />
+                                <gs-grid widths="1,1">
+                                    <gs-block>Mac OS X</gs-block>
+                                    <gs-block><gs-button href="" target="_blank">Download</gs-button></gs-block>
+                                    
+                                    <gs-block>Linux</gs-block>
+                                    <gs-block><gs-button href="" target="_blank">Download</gs-button></gs-block>
+                                    
+                                    <gs-block>FreeBSD</gs-block>
+                                    <gs-block><gs-button href="" target="_blank">Download</gs-button></gs-block>
+                                </gs-grid>
+                            </div>
+                            <div class="option-price"><gs-button onclick="purchase('binary')">$39 / Server</gs-button></div>
+                        </div>
+                    </gs-block>
+                    <gs-block>
+                        <div class="option-container">
+                            <div class="option-name">Cloud</div>
+                            <div class="option-body">We'll create and install Envelope on a Linode Instance for you.<br />Managed By WFP</div>
+                            <div class="option-price"><gs-button onclick="purchase('cloud')">$99 / Month</gs-button></div>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-name">High Performance Cloud</div>
+                            <div class="option-body">We'll create and install Envelope on a high preformance Linode Instance for you.<br />Managed By WFP</div>
+                            <div class="option-price"><gs-button onclick="purchase('high-perf-cloud')">$199 / Month</gs-button></div>
+                        </div>
+                    </gs-block>
+                    <gs-block>
+                        <div class="option-container">
+                            <div class="option-name">Onsite Server</div>
+                            <div class="option-body">We'll mail you an Intel NUC installed with FreeBSD and Envelope.</div>
+                            <div class="option-price"><gs-button onclick="purchase('onsite')">$999</gs-button></div>
+                        </div>
+                    </gs-block>
+                </gs-grid>
+            </gs-body>
+            <gs-footer class="footer-row green">
+                <center><h6>Copyright &copy; 2015 Workflow Products, L.L.C. <span class="phone">(817) 503-9545</span></h6></center>
+            </gs-footer>
+        </gs-page>
+    </body>
+</html>

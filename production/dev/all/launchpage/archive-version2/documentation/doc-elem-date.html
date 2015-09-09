@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Date Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>Date</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Tag:</b>
+                <div class="doc-section doc-mono">
+                    &lt;gs-date&gt;&lt;/gs-date&gt;
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    The gs-date control is like the gs-text control, but it is specialized for dates.
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>Skeleton Example:</b>
+                        A basic gs-date element. Without attributes the gs-date control will have the following behaviors:<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;1) There is a button that activates the date picker.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;2) After choosing a date using the date picker, the date picker disappears and the data changes in the control.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;3) You can also change the date manually.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="date_example">Date Example:</label>
+                            <gs-date id="date_example"></gs-date>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Value Attribute Example:</b>
+                        To set the default value for the gs-date, use the value="" attribute.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="15">
+                            <label for="control_default">Date No Value:</label>
+                            <gs-date id="control_default"></gs-date>
+                            <label for="control_value">Date With Value:</label>
+                            <gs-date id="control_value" value="05/05/05"></gs-date>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Query String Attribute Example:</b>
+                        The qs="" attribute can be used to sync the gs-date with the query string.
+                    </div>
+                    <gs-doc-example query-string="test=05/05/05">
+                        <template for="html">
+                            <label for="control_qs">Date Query String:</label>
+                            <gs-date id="control_qs" qs="test"></gs-date>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Placeholder Attribute Example:</b>
+                        The placeholder="" attribute can be used when you don't want to use a label to explain the purpose of the control to the user. (The label and the placeholder can be used together, that's just not what normally happens.)
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="15">
+                            <label for="control_label">Label:</label>
+                            <gs-date id="control_label"></gs-date>
+                            <label for="control_placeholder_label">Placeholder And Label:</label>
+                            <gs-date placeholder="Placeholder And Label" id="control_placeholder_label"></gs-date>
+                            <gs-date placeholder="Placeholder" id="control_placeholder"></gs-date>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Mini Attribute Example:</b>
+                        Sometimes you are limited on space. The mini attribute can be used to make the gs-date smaller.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="control_mini">Mini:</label>
+                            <gs-date id="control_mini" mini></gs-date>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>No Picker Attribute Example:</b>
+                        If you want to remove the date picker button, simply add the no-picker attribute.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="date_mini">No Picker:</label>
+                            <gs-date no-picker id="date_mini"></gs-date>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Tabindex Attribute Example:</b>
+                        With the tabindex="" attribute, you can control what order your controls are tabbed to.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="25">
+                            <label for="control_1">1:</label>
+                            <gs-date tabindex="1" id="control_1"></gs-date>
+                            <label for="control_3">3:</label>
+                            <gs-date tabindex="3" id="control_3"></gs-date>
+                            <label for="control_2">2:</label>
+                            <gs-date tabindex="2" id="control_2"></gs-date>
+                            <label for="control_4">4:</label>
+                            <gs-date tabindex="4" id="control_4"></gs-date>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Disabled Attribute Example:</b>
+                        With the disabled attribute, you can control whether or not you can use the control.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="15">
+                            <label for="control_disabled">Disabled:</label>
+                            <gs-date disabled id="control_disabled"></gs-date>
+                            <label for="control_enabled">Not Disabled:</label>
+                            <gs-date id="control_enabled"></gs-date>
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

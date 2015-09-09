@@ -1,0 +1,57 @@
+/* severely modified version of gumby framework's grid */
+
+/* ################################################################################# */
+/* ############################ ROW AND COLUMN DEFAULTS ############################ */
+/* ################################################################################# */
+
+gs-grid {
+    display: block;
+    width: 100%;
+    
+    *zoom: 1;
+    
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+gs-block {
+    display: block;
+    float: left;
+    min-height: 1px;
+    
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+gs-grid[padded] > gs-block {
+    padding: 0.25em 0.13em;
+}
+
+gs-grid:before, gs-grid:after {
+    content: '';
+    display: table;
+}
+
+gs-grid:after {
+    clear: both;
+}
+
+
+/* ################################################################################# */
+/* ################################# FORCE  REFLOW ################################# */
+/* ################################################################################# */
+
+gs-grid[force-reflow] {
+    width: 100%;
+}
+
+gs-grid[force-reflow] > gs-block {
+    width: auto !important;
+    float: none;
+}

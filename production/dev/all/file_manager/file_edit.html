@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title id="display-file-name"></title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script>
+            /*global $, WFP, jQuery, console, doT, window, encodeHTML, evt, setTimeout, clearTimeout*/
+            /*jslint white:true*/
+            var strCurrentPageLink, bolCurrentlySaving = false, bolSaveWaiting = false, lastModified, strFolder, intCurrentFind = 0,
+                arrLineNumbers, editor, bolAutoSave = true, bolBlameMode = false, currentSaveAjax, strActionLink = '/v1/postage',
+                intTimerID, testingWindow, currentElementData, jsnTagData = {}, openSelectionMarker, closeSelectionMarker; //consoleCustom = new Array(),
+            
+            function test() {
+                var testingLink = strCurrentPageLink;
+                
+                if (testingLink[0] === '/') {
+                    testingLink = testingLink.substring(1);
+                }
+                
+                if (!testingWindow || (testingWindow && testingWindow.closed === true)) {
+                    if (strFolder === 'dev') {
+                        testingWindow = window.open('/v1/app/' + testingLink);
+                        
+                    } else if (strFolder === 'role') {
+                        testingWindow = window.open('/v1/role/' + testingLink);
+                        
+                    } else {
+                        testingWindow = window.open('/' + testingLink);
+                    }
+                } else {
+                    testingWindow.location.reload(true);
+                }
+                testingWindow.focus();
+            }
+            
+            function designRegisterElement(strTagName, strDocLink) {
+                //console.log(strTagName, strDocLink);
+                
+                jsnTagData[strTagName.toUpperCase()] = {
+                    'documentation': strDocLink
+                };
+            }
+            
+            //
+            function selectorTitleForElement(element) {
+                var i, len, strSelector;
+                
+                // if there is an ID attribute
+                if (element.getAttribute('id')) {
+                    return '#' + element.getAttribute('id');
+                }
+                
+                // first class that
+                //      is not equal to "selected" and
+                //      is not equal to "designMode" and
+                //      is not equal to "design-mark" and
+                //      is not equal to "template-container"
+                if (element.classList.length > 0) {
+                    for (i = 0, len = element.classList.length; i < len; i += 1) {
+                        if (element.classList[i] !== 'selected' &&
+                            element.classList[i] !== 'designMode' &&
+                            element.classList[i] !== 'design-mark' &&
+                            element.classList[i] !== 'template-container') {
+                            
+                            return '.' + element.classList[i];
+                        }
+                    }
+                } 
+                
+                // first attribute that
+                //      is not class and
+                //      is not style and 
+                //      is not id and
+                //      is (when combined with the tagname) less than 25 chars long (including square braces)
+                if (element.attributes.length > 0) {
+                    for (i = 0, len = element.attributes.length; i < len; i += 1) {
+                        if (element.attributes[i].value) {
+                            strSelector = '[' + element.attributes[i].nodeName + '="' + element.attributes[i].value + '"]';
+                        } else {
+                            strSelector = '[' + element.attributes[i].nodeName + ']';
+                        }
+                        
+                        if (element.attributes[i].nodeName !== 'class' &&
+                            element.attributes[i].nodeName !== 'style' &&
+                            element.attributes[i].nodeName !== 'id' &&
+                            (element.nodeName + strSelector).length < 25) {
+                            return strSelector;
+                        }
+                    }
+                } 
+                
+                return '';
+            }
+            
+            function renameFile() {
+                GS.openDialog('dialog-rename', function () {
+                    document.getElementById('input-new-file-name').value = strCurrentPageLink;
+                }, function () {
+                    if (strAnswer === 'Ok') {
+                        var newName = document.getElementById('input-new-file-name').value;
+                        
+                        GS.addLoader('file-rename', 'Updating...');
+                        // need to make sure that the files/folders are renamed in order
+                        GS.ajaxJSON(strActionLink + '/action_file', 'action=mv_file&folder=' + strFolder +
+                                                            '&paths_from=' + encodeURIComponent('["' + strCurrentPageLink + '"]') +
+                                                            '&paths_to=' + encodeURIComponent('["' + newName + '"]'),
+                                                            function(data, error) {
+                            if (!error) {
+                                strCurrentPageLink = newName;
+                                GS.ajaxJSON(strActionLink + '/action_file', 'action=read&folder=' + strFolder +
+                                                                            '&path=' + encodeURIComponent(strCurrentPageLink),
+                                                                            function (data, error) {
+                                    if (!error) {
+                                        lastModified = data.dat.date;
+                                        GS.removeLoader('file-rename');
+                                        
+                                        if (window.opener && window.opener.listCurrentDirectory) {
+                                            window.opener.listCurrentDirectory(false);
+                                        }
+                                        document.getElementById('display-file-name').textContent = 'Editing: ' + strCurrentPageLink.substring(strCurrentPageLink.lastIndexOf('/') + 1);
+                                        GS.pushQueryString('link=' + encodeURIComponent(strCurrentPageLink));
+                                        document.getElementById('display-full-link').innerHTML = strCurrentPageLink;
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                                
+                            } else {
+                                GS.ajaxErrorDialog(data);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function deleteFile() {
+                GS.openDialog('dialog-delete', function () {
+                    document.getElementById('delete-file-path').textContent = strCurrentPageLink;
+                }, function (event, strAnswer) {
+                    if (strAnswer === 'Ok') {
+                        GS.addLoader('file-delete', 'Deleting...');
+                        // need to make sure that the files/folders are renamed in order
+                        GS.ajaxJSON(strActionLink + '/action_file', 'action=rm&folder=' + strFolder +
+                                                                    '&paths=' + encodeURIComponent('["'+strCurrentPageLink+'"]'),
+                                                                    function (data, error) {
+                            GS.removeLoader('file-delete');
+                            
+                            if (!error) {
+                                if (window.opener && window.opener.listCurrentDirectory) {
+                                    window.opener.listCurrentDirectory(false);
+                                }
+                                window.close();
+                            } else {
+                                GS.ajaxErrorDialog(data);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function registerDesignSnippet(strName, strTabTrigger, strSnippet) {
+                snippetManager.register([{'name': strName, 'tabTrigger': strTabTrigger, 'content':  strSnippet}]);
+            }
+            
+            function currentElementFromCursor() {
+                var editorSelection = editor.getSelection(), editorSelectionRange = editor.getSelectionRange(),
+                    strValue = editor.getValue(), arrLines = strValue.split('\n'), strCodeUntilStart, arrCodeUntilStart,
+                    intCurrentRow = editorSelectionRange.end.row, intCurrentColumn = editorSelectionRange.end.column,
+                    intOpenTagStart, intOpenTagEnd, intCloseTagStart, intCloseTagEnd, strTagText, intStart, i, len, ret,
+                    rowStart, columnStart, rowEnd, columnEnd, intCount, strTag, bolFound, bolSingleton, intNeedle;
+                
+                if (editorSelection.inMultiSelectMode !== true && editorSelectionRange.start.row === editorSelectionRange.end.row) {
+                    //console.log(intCurrentRow, intCurrentColumn);
+                    
+                    // turn row and column into a start character number
+                    intStart = intCurrentColumn;
+                    
+                    for (i = 0, len = intCurrentRow; i < len; i += 1) {
+                        intStart += arrLines[i].length + 1;
+                    }
+                    
+                    
+                    /*
+                    if we find a </tag first then
+                    	var bol_found = false
+                    	str_tag = '</found tag>';  -- this is the first tag we found and the only one we care about. only count this tag
+                    	int_count = 0;
+                    	while (not found and not at beginning)
+                    		if we find a </tag> then
+                    			int_count = int_count + 1;
+                    		end if
+                    		if we find a <tag and int_count != 0 then
+                    			int_count = int_count - 1;
+                    		elseif we find a <tag> and int_count === 0 then
+                    			bol_found = true;
+                    		end if
+                    		go back some more
+                    	end while
+                    	if at beginning then blank out property window (bad tag)
+                    
+                    end if*/
+                    
+                    
+                    // go backwards from cursor
+                    for (i = intStart; i > -1; i -= 1) {
+                        // if an open tag is found first
+                        if (strValue[i] === '<' && strValue[i + 1].match(/[a-z]/gim)) {
+                            intOpenTagStart = i;
+                            
+                            // go forwards from intOpenTagStart until a ">" is found
+                            for (i = intOpenTagStart, len = strValue.length; i < len; i += 1) {
+                                if ((strValue[i] === ' ' || strValue[i] === '>') && !strTag) {
+                                    strTag = strValue.substring(intOpenTagStart + 1, i);
+                                    //console.log(strTag);
+                                }
+                                
+                                if (strValue[i] === '>') {
+                                    intOpenTagEnd = i + 1;
+                                    
+                                    bolSingleton = (strValue[i - 1] === '/');
+                                    
+                                    break;
+                                }
+                            }
+                            
+                            // if this is not a singleton: find the end tag
+                            //console.log(bolSingleton);
+                            if (!bolSingleton) {
+                                intNeedle = intOpenTagEnd - 1;
+                                bolFound = false;
+                                intCount = 0;
+                                len = strValue.length;
+                                
+                                while (bolFound === false && intNeedle < len) {
+                                    //console.log(intCount,
+                                    //            strValue.substring(intNeedle, intNeedle + ('</' + strTag + '>').length),
+                                    //            strValue.substring(intNeedle, intNeedle + ('<' + strTag).length));
+                                    if (strValue.substring(intNeedle, intNeedle + ('<' + strTag).length) === '<' + strTag) {
+                                        intCount += 1;
+                                    }
+                                    if (strValue.substring(intNeedle, intNeedle + ('</' + strTag + '>').length) === '</' + strTag + '>' && intCount !== 0) {
+                                        intCount -= 1;
+                                    } else if (strValue.substring(intNeedle, intNeedle + ('</' + strTag + '>').length) === '</' + strTag + '>' && intCount === 0) {
+                                        intCloseTagStart = intNeedle;
+                                        bolFound = true;
+                                    }
+                                    
+                                    intNeedle += 1;
+                                }
+                                
+                                if (intCloseTagStart) {
+                                    // go forwards from intCloseTagStart until a ">" is found
+                                    for (i = intCloseTagStart, len = strValue.length; i < len; i += 1) {
+                                        if (strValue[i] === '>') {
+                                            intCloseTagEnd = i + 1;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            break;
+                            
+                        // else if an end tag is found first
+                        } else if (strValue[i] === '<' && strValue[i + 1] === '/') {
+                            // loop backwards until we find the open tag
+                            intCloseTagStart = i;
+                            bolFound = false;
+                            intCount = 0;
+                            
+                            // go forwards from intCloseTagStart until a ">" is found
+                            for (i = intCloseTagStart, len = strValue.length; i < len; i += 1) {
+                                if (strValue[i] === '>') {
+                                    intCloseTagEnd = i + 1;
+                                    break;
+                                }
+                            }
+                            
+                            strTag = strValue.substring(intCloseTagStart + 2, intCloseTagEnd - 1);
+                            intNeedle = intCloseTagStart - 1;
+                            //console.log(strTag);
+                            
+                            while (bolFound === false && intNeedle > 0) {
+                                //console.log(intCount,
+                                //            strValue.substring(intNeedle, intNeedle + ('</' + strTag + '>').length),
+                                //            strValue.substring(intNeedle, intNeedle + ('<' + strTag).length));
+                                
+                                if (strValue.substring(intNeedle, intNeedle + ('</' + strTag + '>').length) === '</' + strTag + '>') {
+                                    intCount += 1;
+                                }
+                                if (strValue.substring(intNeedle, intNeedle + ('<' + strTag).length) === '<' + strTag && intCount !== 0) {
+                                    intCount -= 1;
+                                } else if (strValue.substring(intNeedle, intNeedle + ('<' + strTag).length) === '<' + strTag && intCount === 0) {
+                                    intOpenTagStart = intNeedle;
+                                    bolFound = true;
+                                }
+                                
+                                intNeedle -= 1;
+                            }
+                            
+                            break;
+                        }
+                    }
+                    
+                    if (intOpenTagStart && !intOpenTagEnd) {
+                        // go forwards from intOpenTagStart until a ">" is found
+                        for (i = intOpenTagStart, len = strValue.length; i < len; i += 1) {
+                            if (strValue[i] === '>') {
+                                intOpenTagEnd = i + 1;
+                                
+                                bolSingleton = (strValue[i - 1] === '/');
+                                
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (intOpenTagStart !== undefined && intOpenTagEnd !== undefined) {
+                        strTagText = strValue.substring(intOpenTagStart, intOpenTagEnd);
+                        
+                        ret = {
+                            'start': intOpenTagStart,
+                            'length': strTagText.length,
+                            'text': strTagText,
+                            'linenumber': strValue.substring(0, intOpenTagStart).split('\n').length
+                        };
+                        
+                        //console.log(intCloseTagStart, intCloseTagEnd);
+                        if (intCloseTagStart !== undefined && intCloseTagEnd !== undefined) {
+                            ret.closestart = intCloseTagStart;
+                            ret.closelength = intCloseTagEnd - intCloseTagStart;
+                        }
+                    }
+                    
+                    /*
+                    
+                    //console.log(intOpenTagStart, intOpenTagEnd, strValue.substring(intOpenTagStart, intOpenTagEnd));
+                    
+                    // go to the first " " or ">" that will get you the tag then
+                    // go until the end of the tag to get all of the attributes
+                    */
+                }
+                
+                //console.log(ret);
+                // remove and old yellow highlights
+                if (openSelectionMarker) {
+                    editor.getSession().removeMarker(openSelectionMarker);
+                    openSelectionMarker = null;
+                }
+                if (closeSelectionMarker) {
+                    editor.getSession().removeMarker(closeSelectionMarker);
+                    closeSelectionMarker = null;
+                }
+                
+                // highlight matches
+                if (ret) {
+                    strCodeUntilStart = strValue.substring(0, ret.start);
+                    arrCodeUntilStart = strCodeUntilStart.split('\n');
+                    
+                    rowStart = arrCodeUntilStart.length - 1;
+                    columnStart = arrCodeUntilStart[rowStart].length;
+                    rowEnd = rowStart + strValue.substring(ret.start, ret.start + ret.length).split('\n').length - 1;
+                    columnEnd = columnStart + ret.length;
+                    
+                    openSelectionMarker = editor.getSession().addMarker(new Range(rowStart, columnStart, rowEnd, columnEnd),
+                                                                    'ace-selected-element', 'background');
+                    
+                    if (ret.closestart && ret.closelength) {
+                        strCodeUntilStart = strValue.substring(0, ret.closestart);
+                        arrCodeUntilStart = strCodeUntilStart.split('\n');
+                        
+                        rowStart = arrCodeUntilStart.length - 1;
+                        columnStart = arrCodeUntilStart[rowStart].length;
+                        rowEnd = rowStart + strValue.substring(ret.closestart, ret.closestart + ret.closelength).split('\n').length - 1;
+                        columnEnd = columnStart + ret.closelength;
+                        
+                        closeSelectionMarker = editor.getSession().addMarker(new Range(rowStart, columnStart, rowEnd, columnEnd),
+                                                                                'ace-selected-element-close', 'background');
+                    }
+                }
+                
+                return ret;
+            }
+            
+            
+            function replaceCurrentTag(replacementElement, currentElement) {
+                var editorSelectionRange = editor.getSelectionRange(),
+                    strCurrentText = editor.getValue(),
+                    replacementElementHTML = decodeHTML(replacementElement.outerHTML);
+                
+                //console.log(replacementElement, currentElement);
+                replacementElementHTML = replacementElementHTML.replace(/=""/gim, '');
+                
+                if (currentElement) {
+                    strCurrentText = strCurrentText.substring(0, currentElement.start) +
+                                     replacementElementHTML.substring(0, replacementElementHTML.indexOf('>') + 1) +
+                                     strCurrentText.substring(currentElement.start + currentElement.length);
+                }
+                
+                editor.setValue(strCurrentText);
+                editor.selection.setSelectionRange(
+                        new Range(editorSelectionRange.start.row, editorSelectionRange.start.column, editorSelectionRange.end.row, editorSelectionRange.end.column));
+                currentElementData = currentElementFromCursor();
+                
+                if (bolAutoSave) {
+                    clearTimeout(intTimerID);
+                    intTimerID = setTimeout(function() {
+                        saveFile();
+                    }, 300);
+                }
+            }
+            
+            function loadFile() {
+                var strFileExtension;
+                
+                GS.addLoader('file-load', 'Loading File...');
+                GS.ajaxJSON(strActionLink + '/action_file', 'action=read&folder=' + strFolder + '&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                    //console.log(data, error);
+                    
+                    GS.removeLoader('file-load');
+                    
+                    if (!error) {
+                        lastModified = data.dat.date;
+                        
+                        strFileExtension = strCurrentPageLink.substring(strCurrentPageLink.lastIndexOf('.') + 1);
+                        
+                        // if we are not in an HTML document: remove test button
+                        if (strFileExtension !== 'html') {
+                            document.getElementById('button-test').parentNode.removeChild(document.getElementById('button-test'));
+                        }
+                        
+                        //
+                        if (strFileExtension === 'html' || strFileExtension === 'css') {
+                            strParsingMode = strFileExtension;
+                        } else if (strFileExtension === 'js') {
+                            strParsingMode = 'javascript';
+                        } else if (strFileExtension === 'sql' || strFileExtension === 'once' || strFileExtension === 'drop' || strFileExtension === 'replace') {
+                            strParsingMode = 'sql';
+                        } else {
+                            strParsingMode = 'text';
+                        }
+                        
+                        //
+                        editor = ace.edit('area');
+                        
+                        editor.setTheme('ace/theme/eclipse');
+                        editor.getSession().setMode('ace/mode/' + strParsingMode);
+                        editor.setShowPrintMargin(false);
+                        editor.setDisplayIndentGuides(true);
+                        editor.setShowFoldWidgets(false);
+                        editor.session.setUseWrapMode('free');
+                        editor.setBehavioursEnabled(false);
+                        editor.$blockScrolling = Infinity; // <== blocks a warning
+                        
+                        editor.setOptions({
+                            'enableBasicAutocompletion': true,
+                            'enableSnippets'           : true,
+                            'enableLiveAutocompletion' : true
+                        });
+                        
+                        editor.setValue(data.dat.content);
+                        
+                        if (evt.touchDevice) {
+                            editor.setOptions({
+                                maxLines: Infinity
+                            });
+                            
+                        } else {
+                            document.getElementById('area').style.height = '100%';
+                        }
+                        
+                        editor.resize(true);
+                        editor.focus();
+                        editor.selection.setSelectionRange(new Range(0, 0, 0, 0));
+                        
+                        editor.replace = function(replacement, options) {
+                            if (options)
+                                this.$search.set(options);
+                            var range = this.$search.find(this.session);
+                            var replaced = 0;
+                            if (!range)
+                                return replaced;
+                            if (this.$tryReplace(range, replacement)) {
+                                replaced = 1;
+                            }
+                            if (range !== null) {
+                                this.selection.setSelectionRange(range);
+                                this.renderer.scrollSelectionIntoView(range.start, range.end);
+                            }
+                            if (bolAutoSave) {
+                                clearTimeout(intTimerID);
+                                intTimerID = setTimeout(function() {
+                                    saveFile();
+                                }, 300);
+                            }
+                            return replaced;
+                        };
+                        
+                        editor.replaceAll = function(replacement, options) {
+                            if (options) {
+                                this.$search.set(options);
+                            }
+                            var ranges = this.$search.findAll(this.session);
+                            var replaced = 0;
+                            if (!ranges.length)
+                                return replaced;
+                            this.$blockScrolling += 1;
+                            var selection = this.getSelectionRange();
+                            this.selection.moveTo(0, 0);
+                            for (var i = ranges.length - 1; i >= 0; --i) {
+                                if(this.$tryReplace(ranges[i], replacement)) {
+                                    replaced++;
+                                }
+                            }
+                            this.selection.setSelectionRange(selection);
+                            this.$blockScrolling -= 1;
+                            if (bolAutoSave) {
+                                clearTimeout(intTimerID);
+                                intTimerID = setTimeout(function() {
+                                    saveFile();
+                                }, 300);
+                            }
+                            return replaced;
+                        };
+                        
+                        //.getElementById('area')
+                        document.addEventListener('keydown', function (event) {
+                            var intKeyCode = event.which || event.keyCode;
+                            
+                            if (intKeyCode === 83 && event.metaKey) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                clearTimeout(intTimerID);
+                                saveFile(true);
+                            } else if (bolAutoSave) {
+                                clearTimeout(intTimerID);
+                                intTimerID = setTimeout(function() {
+                                    saveFile();
+                                }, 300);
+                            }
+                        });
+                        
+                        //
+                        document.getElementById('area').addEventListener('keyup', function (event) {
+                            var intKeyCode = event.which || event.keyCode;
+                            
+                            if ((intKeyCode === 8 || intKeyCode === 9 || intKeyCode === 13 || intKeyCode === 32 || intKeyCode === 46) && bolAutoSave) {
+                                clearTimeout(intTimerID);
+                                intTimerID = setTimeout(function() {
+                                    saveFile();
+                                }, 300);
+                            }
+                        });
+                        
+                        //
+                        document.getElementById('ace-indicator').addEventListener('click', function () {
+                            saveFile(true);
+                        });
+                        
+                        // selection change handler
+                        selectionChangeHandler = function (event) {
+                            var currentElement = currentElementFromCursor();
+                            
+                            if (currentElement) {
+                                // turn tag html into element
+                                selectedElement = GS.stringToElement(currentElement.text, document.getElementById('sandbox').contentWindow.document);
+                                
+                                // run property function on tag
+                                if (selectedElement) {
+                                    propertyList(selectedElement, currentElement);
+                                } else {
+                                    clearPropertyList();
+                                }
+                            } else {
+                                clearPropertyList();
+                            }
+                        };
+                        
+                        document.getElementById('area').addEventListener(evt.mouseup, selectionChangeHandler);
+                        document.getElementById('area').addEventListener('keyup', selectionChangeHandler);
+                        
+                        // trigger design code from the custom elements
+                        GS.triggerEvent(window, 'design-register-element');
+                        
+                        // test button and F5
+                        if (document.getElementById('button-test')) {
+                            document.getElementById('button-test').addEventListener('click', test);
+                            window.addEventListener('keydown', function (event) {
+                                var intKeyCode = event.which || event.keyCode;
+                                
+                                //console.log(intKeyCode);
+                                if (intKeyCode === 116) {
+                                    test();
+                                }
+                            });
+                        }
+                        
+                        // hide panel if on a phone
+                        if (evt.deviceType === 'phone' || evt.deviceType === 'tablet') {
+                            document.getElementById('property-panel').setAttribute('hidden', '');
+                        }
+                        
+                        // panel close/open buttons
+                        document.getElementById('button-panel-open').addEventListener('click', function () {
+                            document.getElementById('property-panel').removeAttribute('hidden');
+                            editor.resize();
+                        });
+                        document.getElementById('button-panel-close').addEventListener('click', function () {
+                            document.getElementById('property-panel').setAttribute('hidden', '');
+                            editor.resize();
+                        });
+                        
+                        //
+                        search();
+                    } else {
+                        document.getElementById('button-blame').setAttribute('hidden', '');
+                        document.getElementById('button-history').setAttribute('hidden', '');
+                        //document.getElementById('button-design').setAttribute('hidden', '');
+                        document.getElementById('area').innerHTML = '<br />' +
+                                                                    '<center>This file does not exist. Would you like to create it?</center>' +
+                                                                    '<br />' +
+                                                                    '<gs-button id="button-create-file">Create The File</gs-button>' +
+                                                                    '<div id="section-history" hidden>' +
+                                                                        '<br />' +
+                                                                        '<center>A file with this name has history here (there has been <b id="history-version-number"></b> historical version(s) of this file!)</center>' +
+                                                                        '<br />' +
+                                                                        '<gs-button id="button-old-file-history">Look At The History</gs-button>' +
+                                                                    '</div>';
+                        
+                        
+                        document.getElementById('button-create-file').addEventListener('click', function () {
+                            createFile();
+                        });
+                        
+                        GS.ajaxJSON(strActionLink + '/action_file', 'action=timeline&folder=' + strFolder + // finfo
+                                                                           '&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                            var arrTimelineMatch, strTimelineMatch;//i, len, arrRaw = [];
+                            
+                            /*
+                            === 2015-03-19 ===
+                            18:33:21 [113496b0a6] michael new file editor (user: michael@tocci.org tags: working, trunk)
+                            17:31:05 [3387176d72] michael wiki fix (user: michael@tocci.org tags: working, trunk)
+                            +++ end of timeline (2) +++
+                            */
+                            
+                            if (!error) {
+                                //arrRaw = (data.dat.match(/[0-9]*-[0-9]*-[0-9]* \[[a-z0-9]*\] .* \(user:/gim) || []);
+                                
+                                //console.log(data.dat.match(/\+\+\+ end of timeline \([0-9]*\) \+\+\+/gi));
+                                
+                                arrTimelineMatch = data.dat.match(/\+\+\+ end of timeline \([0-9]*\) \+\+\+/gi);
+                                strTimelineMatch = arrTimelineMatch[arrTimelineMatch.length - 1];
+                                strNumberOfVersions = strTimelineMatch.substring('+++ end of timeline ('.length, strTimelineMatch.length - ') +++'.length);
+                                
+                                //console.log(strNumberOfVersions);
+                                
+                                //if (arrRaw.length > 0) {
+                                if (strNumberOfVersions !== '0') {
+                                    document.getElementById('history-version-number').textContent = strNumberOfVersions; //arrRaw.length;
+                                    document.getElementById('button-old-file-history').addEventListener('click', function () {
+                                        fileHistory();
+                                    });
+                                    
+                                    document.getElementById('section-history').removeAttribute('hidden');
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function createFile() {
+                GS.addLoader('file-create', 'Creating File...');
+                GS.ajaxJSON(strActionLink + '/action_file', 'action=write' +
+                                                                    '&folder=' + strFolder +
+                                                                    '&path=' + encodeURIComponent(strCurrentPageLink) +
+                                                                    '&content=', function(data, error) {
+                    if (!error) {
+                        window.location.reload();
+                    } else {
+                        GS.removeLoader('file-create');
+                        GS.ajaxErrorDialog(data, function() {
+                            createFile();
+                        });
+                    }
+                });
+            }
+            
+            
+            function search() {
+                'use strict';
+                var aceContainer = document.getElementById('area'), regexToggle, caseSensitiveToggle,
+                    jsnArgs = GS.qryToJSON(GS.getQueryString());
+
+                if (jsnArgs.pattern) {
+                    editor.find(jsnArgs.pattern);
+                    editor.execCommand('find');
+                    
+                    regexToggle = xtag.query(aceContainer, '.ace_search .ace_button[action="toggleRegexpMode"]')[0];
+                    caseSensitiveToggle = xtag.query(aceContainer, '.ace_search .ace_button[action="toggleCaseSensitive"]')[0];
+                    
+                    if (jsnArgs.regexp === 'true' && !regexToggle.classList.contains('checked')) {
+                        GS.triggerEvent(regexToggle, 'click');
+                        
+                    } else if (jsnArgs.regexp !== 'true' && regexToggle.classList.contains('checked')) {
+                        GS.triggerEvent(regexToggle, 'click');
+                    }
+                    
+                    if (jsnArgs.case === 'true' && !caseSensitiveToggle.classList.contains('checked')) {
+                        GS.triggerEvent(caseSensitiveToggle, 'click');
+                        
+                    } else if (jsnArgs.case !== 'true' && caseSensitiveToggle.classList.contains('checked')) {
+                        GS.triggerEvent(caseSensitiveToggle, 'click');
+                    }
+                }
+            }
+            
+            function saveFile(bolLoader) {
+                'use strict';
+                var aceIndicator = document.getElementById('ace-indicator');
+                
+                if (bolCurrentlySaving === false) {
+                    bolCurrentlySaving = true;
+                    
+                    if (bolLoader) {
+                        GS.addLoader('file-save', 'Saving...');
+                    }
+                    
+                    aceIndicator.removeAttribute('hidden');
+                    aceIndicator.textContent = 'Saving...';
+                    aceIndicator.classList.remove('indicator-error');
+                    
+                    currentSaveAjax = GS.ajaxJSON(strActionLink + '/action_file', 'action=write' +
+                                                                                '&folder=' + strFolder +
+                                                                                '&path=' + encodeURIComponent(strCurrentPageLink) +
+                                                                                '&change_stamp=' + encodeURIComponent(lastModified) +
+                                                                                '&content=' + encodeURIComponent(editor.getValue()), function(data, error) {
+                            aceIndicator.setAttribute('hidden', '');
+                            if (bolLoader) {
+                                GS.removeLoader('file-save');
+                            }
+                            
+                            if (!error) {
+                                //consoleCustom.push({
+                                //    'ajax returned': (new Date()).toUTCString(),
+                                //    'send': lastModified,
+                                //    'returned': data.dat
+                                //});
+                                
+                                lastModified = data.dat;
+                                
+                                if (!bolAutoSave) {
+                                    bolAutoSave = true;
+                                    GS.pushMessage('Auto-saving has been turned on.', 1000);
+                                }
+
+                                bolCurrentlySaving = false;
+                                if (bolSaveWaiting) {
+                                    bolSaveWaiting = false;
+                                    saveFile();
+                                } else {
+                                    if (!testingWindow || (testingWindow && testingWindow.closed === true)) {
+                                        //there is no window, and they haven't indicated they want one
+                                    } else {
+                                        //there is one, so reload it
+                                        testingWindow.location.reload(true);
+                                    }
+                                }
+                            } else {
+                                bolSaveWaiting = false;
+                                bolCurrentlySaving = false;
+                                bolAutoSave = false;
+                                aceIndicator.removeAttribute('hidden');
+                                aceIndicator.innerHTML = 'CHANGES ARE NOT SAVED<br />CLICK HERE TO TRY AGAIN';
+                                aceIndicator.classList.add('indicator-error');
+                                
+                                data.error_hint = 'Auto-saving has been turned off.\n' +
+                                                  'Please save a copy of this code locally so that you do not lose your changes.\n\n' +
+                                                  'Click "Cancel" to continue editing. Click "Try Again" to attempt another save.';
+                                
+                                GS.ajaxErrorDialog(data, function() {
+                                    saveFile(true);
+                                });
+                            }
+                        });
+                } else {
+                    bolSaveWaiting = true;
+                }
+            }
+            
+            function fileHistory() {
+                'use strict';
+                GS.addLoader('history-load', 'Loading History...');
+                GS.ajaxJSON(strActionLink + '/action_file', 'action=timeline&folder=' + strFolder + // finfo
+                                                                   '&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                    var arrTimelineMatch, strTimelineMatch, strNumberOfVersions, strHTML, arrLine,
+                        arrDates = [], arrCurrentCommits = [], strCurrentDate, i, len,
+                        strCommitId, strTime, strMessage, commit_i, commit_len;//, arrRaw = [];
+                    
+                    GS.removeLoader('history-load');
+                    
+                    if (!error) {
+                        arrTimelineMatch = data.dat.match(/\+\+\+ end of timeline \([0-9]*\) \+\+\+/gi);
+                        strTimelineMatch = arrTimelineMatch[arrTimelineMatch.length - 1];
+                        strNumberOfVersions = strTimelineMatch.substring('+++ end of timeline ('.length, strTimelineMatch.length - ') +++'.length);
+                        
+                        if (strNumberOfVersions !== '0') {
+                            
+                            arrLine = data.dat.split('\n');
+                            
+                            //console.log(arrLine);
+                            
+                            for (i = 0, len = arrLine.length; i < len; i += 1) {
+                                // date line (moskow)
+                                if (arrLine[i].substring(0, 3) === '===') { // wow, right?
+                                    if (strCurrentDate) {
+                                        arrDates.push({'date': strCurrentDate, 'commits': arrCurrentCommits});
+                                    }
+                                    strCurrentDate = arrLine[i].match(/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/)[0];
+                                    arrCurrentCommits = [];
+                                    
+                                // commit line
+                                } else if (arrLine[i].substring(0, 8).match(/..:..:../)) { // weird if statments
+                                    // keep square brackets
+                                    strCommitId = arrLine[i].match(/\[[a-z0-9]*\]/)[0];
+                                    strTime = arrLine[i].substring(0, 8);
+                                    strMessage = arrLine[i].substring(strTime.length + 1 + strCommitId.length + 1, arrLine[i].indexOf(' (user: ')).replace('*CURRENT* ', '');
+                                    
+                                    arrCurrentCommits.push({'commit_id': strCommitId, 'time': strTime, 'message': strMessage});
+                                // number of versions line
+                                } else if (arrLine[i].substring(0, 3) === '+++') {
+                                    arrDates.push({'date': strCurrentDate, 'commits': arrCurrentCommits});
+                                }
+                                
+                                //console.log(arrLine[i]);
+                            }
+                            
+                            arrDates.reverse();
+                            
+                            for (i = 0, len = arrDates.length, strHTML = ''; i < len; i += 1) {
+                                arrDates[i].commits.reverse();
+                                
+                                for (commit_i = 0, commit_len = arrDates[i].commits.length; commit_i < commit_len; commit_i += 1) {
+                                    strHTML +=  '<gs-button class="button-commit" commit-id="' + arrDates[i].commits[commit_i].commit_id + '">' +
+                                                    arrDates[i].date + ' ' + arrDates[i].commits[commit_i].time + ' ' + arrDates[i].commits[commit_i].message +
+                                                '</gs-button>\n';
+                                }
+                            }
+                            
+                            GS.openDialog('dialog-history', function () {
+                                document.getElementById('dialog-content-container').textContent = strHTML;
+                            }, function () {
+                                var dialog = this, arrElement, i, len;
+                                
+                                arrElement = xtag.query(dialog, '.button-commit');
+                                
+                                for (i = 0, len = arrElement.length; i < len; i += 1) {
+                                    arrElement[i].addEventListener('click', function () {
+                                        fileOldCommit(this.getAttribute('commit-id'));
+                                    });
+                                }
+                            });
+                            
+                        } else {
+                            GS.msgbox('No History...', '<div style="padding: 1em">No history found for file: ' + encodeHTML(strCurrentPageLink) + '</div>', ['Ok']);
+                        }
+                        
+                    } else {
+                        GS.ajaxErrorDialog(data, function () {
+                            fileHistory();
+                        });
+                    }
+                });
+            }
+            
+            /*
+                === 2015-03-19 ===
+                18:33:21 [113496b0a6] michael new file editor (user: michael@tocci.org tags: working, trunk)
+                17:31:05 [3387176d72] michael wiki fix (user: michael@tocci.org tags: working, trunk)
+                +++ end of timeline (2) +++
+            
+            
+            GS.ajaxJSON(strActionLink + '/action_file', 'action=timeline&folder=' + strFolder + '&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                var arrTimelineMatch, strTimelineMatch;//i, len, arrRaw = [];
+                
+                if (!error) {
+                    arrTimelineMatch = data.dat.match(/\+\+\+ end of timeline \([0-9]*\) \+\+\+/gi);
+                    strTimelineMatch = arrTimelineMatch[arrTimelineMatch.length - 1];
+                    strNumberOfVersions = strTimelineMatch.substring('+++ end of timeline ('.length, strTimelineMatch.length - ') +++'.length);
+                    
+                    if (strNumberOfVersions !== '0') {
+                        document.getElementById('history-version-number').textContent = strNumberOfVersions; //arrRaw.length;
+                        document.getElementById('button-old-file-history').addEventListener('click', function () {
+                            fileHistory();
+                        });
+                        
+                        document.getElementById('section-history').removeAttribute('hidden');
+                    }
+                }
+            });
+            
+            */
+            
+            function fileOldCommit(strCommitId) {
+                'use strict';
+                GS.addLoader('history-load', 'Loading History...');
+                
+                GS.ajaxJSON(strActionLink + '/action_file', 'action=cat&folder=' + strFolder +
+                                                                 '&path=' + encodeURIComponent(strCurrentPageLink) +
+                                                                 '&commit=' + strCommitId.replace(/[\[|\]]/g, ''), function (data, error) {
+                    
+                    GS.removeLoader('history-load');
+                    
+                    if (!error) {
+                        GS.openDialog('dialog-commit', function () {
+                            document.getElementById('dialog-header-commit').textContent = strCommitId;
+                            document.getElementById('dialog-body-text').textContent = data.dat;
+                        });
+                    } else {
+                        GS.ajaxErrorDialog(data, function () {
+                            fileOldCommit(strCommitId);
+                        });
+                    }
+                });
+            }
+            
+            function fileBlameToggle() {
+                'use strict';
+                if (bolBlameMode) {
+                    document.getElementById('area').removeAttribute('hidden');
+                    document.getElementById('blame').setAttribute('hidden', '');
+                    document.getElementById('button-blame').textContent = 'Blame';
+                    
+                } else {
+                    GS.addLoader('blame-load', 'Loading Blame Data...');
+                    GS.ajaxJSON(strActionLink + '/action_file', 'action=blame&folder=' + strFolder +
+                                                                       '&path=' + encodeURIComponent(strCurrentPageLink), function (data, error) {
+                        if (!error) {
+                            document.getElementById('blame').removeAttribute('hidden');
+                            document.getElementById('area').setAttribute('hidden', '');
+                            document.getElementById('blame').textContent = data.dat;
+                            document.getElementById('button-blame').textContent = 'Edit';
+                            
+                        } else {
+                            GS.ajaxErrorDialog(data, function () {
+                                bolBlameMode = false;
+                                fileBlameToggle();
+                            });
+                        }
+                        GS.removeLoader('blame-load');
+                    });
+                }
+                
+                bolBlameMode = !bolBlameMode; // <== I wonder where I got that shortcut from, legitimately
+            }
+            
+            window.addEventListener('load', function () { // DOMContentLoaded
+                var jsnArgs = GS.qryToJSON(GS.getQueryString()), strParsingMode;
+                
+                //window.Find = require('ace/find').Find;
+                window.Range = require('ace/range').Range;
+                window.snippetManager = require('ace/snippets').snippetManager;
+                
+                //
+                strFolder = jsnArgs.folder || 'dev';
+                strCurrentPageLink = jsnArgs.link;
+                
+                //
+                if (strFolder === 'role') {
+                    strActionLink = '/v1/env';
+                }
+                
+                //
+                document.getElementById('display-file-name').textContent = 
+                                'Editing: ' + strCurrentPageLink.substring(strCurrentPageLink.lastIndexOf('/') + 1);
+                
+                document.getElementById('display-full-link').innerHTML = strCurrentPageLink;
+                
+                //
+                loadFile();
+                
+                //
+                /*$('#button_pull').on('tap', function() {
+                    $.showLoader('Pulling...');
+                    WFP.ajax('/v1/postage', 'action_fossil', 'action=test', function(data, error) {
+                        $.hideLoader();
+                        if (!error) {
+                            var arr_added   = data.match(  /ADDED/gm)
+                              , arr_edited  = data.match( /EDITED/gm)
+                              , arr_deleted = data.match(/DELETED/gm)
+                              , int_added   = arr_added   ? arr_added.length   : 0
+                              , int_edited  = arr_edited  ? arr_edited.length  : 0
+                              , int_deleted = arr_deleted ? arr_deleted.length : 0
+                              , strHumanReadable =  int_added   + ' Added, ' +
+                                                    int_edited  + ' Edited, ' +
+                                                    int_deleted + ' Deleted';
+                            $.pushMessage(strHumanReadable);
+                        } else {
+                            WFP.ajax_error_popup(data, function() {
+                                $('#button_pull').trigger('tap');
+                            });
+                        }
+                    });
+                });*/
+                
+                //
+                document.getElementById('button-history').addEventListener('click', function () {
+                    fileHistory();
+                });
+                
+                //
+                document.getElementById('button-blame').addEventListener('click', function () {
+                    fileBlameToggle();
+                });
+                
+                //
+                document.getElementById('button-rename').addEventListener('click', function () {
+                    renameFile();
+                });
+                
+                //
+                document.getElementById('button-delete').addEventListener('click', function () {
+                    deleteFile();
+                });
+            });
+            
+            window.onbeforeunload = function () {
+                //remove testing window
+                if (!testingWindow || (testingWindow && testingWindow.closed === true)) {
+                    //there is no testing window, so we're good
+                } else {
+                    //there is one, so get rid of it
+                    testingWindow.close();
+                }
+                
+                if (bolCurrentlySaving) {
+                    currentSaveAjax.abort();
+                    bolSaveWaiting = false;
+                    bolCurrentlySaving = false;
+                    saveFile();
+                    
+                } else if (!bolAutoSave) {
+                    return 'You have unsaved changes.';
+                }
+            };
+        </script>
+        
+        <script src="design_standard_elements.js" type="text/javascript"></script>
+        <script src="design_property.js" type="text/javascript"></script>
+        
+        <style>
+            #editor-container {
+                height: 100%;
+            }
+            
+            #container {
+                position: relative;
+            }
+            
+            #blame {
+                height: 100%;
+                white-space: pre-wrap;
+                overflow: auto;
+            }
+            
+            #area {
+                height: 100%;
+            }
+            
+            #ace-indicator {
+                /*
+                position: absolute;
+                top: 0.2em;
+                right: 2em;
+                z-index: 50;
+                */
+                position: absolute;
+                top: 0.2em;
+                left: 50%;
+                margin-left: -125px;
+                width: 250px;
+                text-align: center;
+                
+                z-index: 50;
+            }
+            
+            #ace-indicator.indicator-error {
+                border: 2px dashed #000000;
+                background-color: #FF5555;
+                padding: 0.2em;
+                right: 1em;
+            }
+        
+            #property-panel {
+                background-color: #F5F5F5;
+                position: relative;
+                
+                border-left: 1px solid #3B99BE;
+                box-shadow: 0 0 0.2em 0 #999999;
+                width: 20em;
+                
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                -ms-box-sizing: border-box;
+                -o-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            
+            /* when the page gets too small widthwise: make side box position absolute */
+            @media (max-width: 768px) {
+                #property-panel {
+                    position: absolute;
+                    height: 100%;
+                    right: 0;
+                    top: 0;
+                    border-left: 2px solid #3B99BE;
+                    width: 94%;
+                    z-index: 2;
+                }
+            }
+            
+            #property-panel-padding {
+                padding: 0.5em;
+                
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                -ms-box-sizing: border-box;
+                -o-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            
+            #global-property-section,
+            #element-property-section,
+            #siblings-and-children-section {
+                padding: 0 0.2em 0.25em 0.2em;
+            }
+            
+            #property-panel .section-heading {
+                margin: 0.3em 0;
+                padding: 0.2em 0.1em;
+                border-bottom: 2px solid #A3A3A3;
+            }
+            
+            #property-panel .section-heading h5 {
+                margin: 0;
+                padding: 0;
+            }
+            
+            #property-panel-scroll-container {
+                /*width: 100%;
+                height: 100%;*/
+                
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            
+            
+            #global-property-section > table,
+            #element-property-section > table {
+                border: 2px solid #CCCCCC;
+            }
+            
+            #global-property-section > table tr th:first-child,
+            #element-property-section > table tr th:first-child {
+                font-size: 0.8em;
+                line-height: 0.9;
+            }
+            
+            #global-property-section > table tr td:last-child,
+            #element-property-section > table tr td:last-child {
+                border-left-width: 2px;
+            }
+            
+            .blue #global-property-section > table > tbody > tr > td *,
+            .blue #global-property-section > table > tbody > tr > th *,
+            .blue #element-property-section > table > tbody > tr > td *,
+            .blue #element-property-section > table > tbody > tr > th * {
+                background-color: transparent;
+            }
+            
+            #button-panel-close {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 1;
+            }
+            
+            #element-property-title .tag-name {
+                color: #0000FF;
+            }
+            #element-property-title .tag-selector {
+                color: #CB7119;
+            }
+            #element-property-title .line-number {
+                font-size: 0.8em;
+            }
+            
+            .ace-selected-element {
+                position: absolute;
+                background-color: #FBFFBE;
+                z-index: 4;
+            }
+            
+            .ace-selected-element-close {
+                position: absolute;
+                background-color: #FBFFBE;
+                opacity: 0.5;
+                z-index: 4;
+            }
+        </style>
+    </head>
+    <body class="blue">
+        <template id="dialog-rename">
+            <gs-page>
+                <gs-header><center><h3>Rename</h3></center></gs-header>
+                <gs-body padded>
+                    <gs-text id="input-new-file-name"></gs-text>
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose listen-for-return emphasis>Ok</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <template id="dialog-delete">
+            <gs-page>
+                <gs-header><center><h3>Delete</h3></center></gs-header>
+                <gs-body padded>
+                    Are you sure you want to delete the file: "<span id="delete-file-path"></span>"?
+                </gs-body>
+                <gs-footer>
+                    <gs-grid>
+                        <gs-block><gs-button dialogclose>Cancel</gs-button></gs-block>
+                        <gs-block><gs-button dialogclose listen-for-return emphasis>Ok</gs-button></gs-block>
+                    </gs-grid>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <template id="dialog-history">
+            <gs-page>
+                <gs-header><center><h3>History</h3></center></gs-header>
+                <gs-body padded>
+                    <div id="dialog-content-container"></div>
+                </gs-body>
+                <gs-footer>
+                    <gs-button dialogclose>Done</gs-button>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <template id="dialog-commit" data-max-width="2000px" data-max-height="2000px">
+            <gs-page>
+                <gs-header><center><h3>Commit: <span id="dialog-header-commit"></span></h3></center></gs-header>
+                <gs-body padded>
+                    <pre id="dialog-body-text" class="selectable" style="font-size: 0.8em"></pre>
+                </gs-body>
+                <gs-footer>
+                    <gs-button dialogclose>Done</gs-button>
+                </gs-footer>
+            </gs-page>
+        </template>
+        
+        <iframe id="sandbox" hidden></iframe>
+        <div id="editor-container" flex-horizontal flex-fill>
+            <gs-page flex>
+                <gs-header flex-horizontal>
+                    <h3 id="display-full-link" flex></h3>
+                    <gs-button id="button-rename">Rename</gs-button>
+                    <gs-button id="button-delete">Delete</gs-button>
+                    <gs-button id="button-blame">Blame</gs-button>
+                    <gs-button id="button-history">History</gs-button>
+                    <!--<gs-button id="button-pull">Pull</gs-button>-->
+                    <gs-button id="button-test">Test</gs-button>
+                    <gs-button id="button-panel-open" icononly icon="arrow-right"></gs-button>
+                </gs-header>
+                <gs-body id="container">
+                    <div id="ace-indicator"></div>
+                    <div id="blame" hidden></div>
+                    <div id="area"></div>
+                </gs-body>
+            </gs-page>
+            <div id="property-panel" flex-vertical flex-fill>
+                <gs-button id="button-panel-close" icononly icon="times" no-focus></gs-button>
+                <div id="property-panel-padding" flex-vertical flex-fill flex disabled>
+                    <div id="property-panel-scroll-container" flex>
+                        <center class="section-heading">
+                            <h5 id="element-property-title">Element Properties</h5>
+                            <gs-button id="element-documentation-link" hidden>Documentation</gs-button>
+                        </center>
+                        <div id="global-property-section"></div>
+                        
+                        <center class="section-heading"><h5>Element Properties</h5></center>
+                        <div id="element-property-section"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

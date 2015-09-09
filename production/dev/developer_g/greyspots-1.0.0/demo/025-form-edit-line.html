@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Combined Edit Test</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-form src="adr.tcard_header" where="id=500066">
+            <template>
+                <label for="text-edit-first_name">First Name:</label>
+                <gs-text id="text-edit-first_name" column="first_name"></gs-text>
+                
+                <label for="text-edit-last_name">Last Name:</label>
+                <gs-text id="text-edit-last_name" column="last_name"></gs-text>
+                
+                <label for="text-edit-company_name">Company Name:</label>
+                <gs-text id="text-edit-company_name" column="company_name"></gs-text>
+                
+                <label for="text-edit-company_title">Company Title:</label>
+                <gs-text id="text-edit-company_title" column="company_title"></gs-text>
+                
+                <label for="date-edit-co">Company?:</label>
+                <gs-checkbox id="date-edit-co" column="co"></gs-checkbox>
+                <br />
+                <gs-envelope src="adr.tcard_line" column="id" child-column="card_id" no-hudlimit no-hudorderby no-hudrefresh>
+                    <template for="hud"></template>
+                    <template for="table">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><gs-text column="col_key" mini></gs-text></td>
+                                    <td><gs-memo column="col_value" mini autoresize rows="1"></gs-memo></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template for="insert">
+                        <label for="text-insert-col_key">Property Name:</label>
+                        <gs-text id="text-insert-col_key" column="col_key"></gs-text>
+                        
+                        <label for="text-insert-col_value">Property Value:</label>
+                        <gs-memo id="text-insert-col_value" column="col_value"></gs-memo>
+                    </template>
+                </gs-envelope>
+            </template>
+        </gs-form>
+    </body>
+</html>

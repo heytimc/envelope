@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Data Editing</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script>
+            var strWhere = '', strOrderBy = 'id ASC', strLimit = '500', strOffset = '0';
+            
+            window.addEventListener('load', function () {
+                var strQueryString = GS.getQueryString(),
+                    strType = GS.qryGetVal(strQueryString, 'type'),
+                    strName = GS.qryGetVal(strQueryString, 'name'),
+                    strObjectName = strName.substring(strName.indexOf('.') + 1),
+                    strPath, strParameters, strAttributes;
+                
+                document.title = GS.strToTitle(strType) + ': "' + strName + '"';
+                document.getElementById('object-name').textContent = 'Editing ' + GS.strToTitle(strType) + ': "' + strName + '"';
+                
+                strParameters = 'limit=0&src=' + encodeURIComponent(strName);
+                
+                GS.ajaxJSON('/v1/postage/action_select' /*strPath*/, strParameters, function (response, error) {
+                    var data, i, len, strRecordHTML = '', strInsertHTML = '', envelopeElement, strColumn;
+                    
+                    if (!error) {
+                        data = response.dat;
+                        
+                        strRecordHTML = '<th><gs-static column="row_number"></gs-static></th>';
+                        
+                        for (i = 0, len = data.arr_column.length; i < len; i += 1) {
+                            strColumn = encodeHTML(data.arr_column[i]);
+                            
+                            strRecordHTML += '<td heading="' + strColumn + '">' +
+                                                 '<gs-text mini column="' + strColumn + '"></gs-text>' +
+                                             '</td>';
+                            strInsertHTML += '<label for="control-insert-' + strColumn + '">' + strColumn + ':</label>' +
+                                             '<gs-text id="control-insert-' + strColumn + '" column="' + strColumn + '"></gs-text>';
+                        }
+                        
+                        strAttributes = 'source="' + strName + '" ';
+                        
+                        strHTML = '<gs-envelope id="envelope-data-editing" ' +
+                                  '             ' + strAttributes + ' ' +
+                                  '             action-select="postage/action_select" ' +
+                                  '             action-insert="postage/action_insert" ' +
+                                  '             action-update="postage/action_update" ' +
+                                  '             action-delete="postage/action_delete" ' +
+                                  '             limit="{{= strLimit || \'\' }}" ' +
+                                  '             where="{{= strWhere || \'\' }}" ' +
+                                  '             offset="{{= strOffset || \'\' }}" ' +
+                                  '             ord="{{= strOrderBy || \'\' }}" ' +
+                                  '             no-hudorderby no-hudlimit>' +
+                                  '    <template for="table">' +
+                                  '        <table>' +
+                                  '            <tbody>' +
+                                  '                <tr>' + strRecordHTML + '</tr>' +
+                                  '            </tbody>' +
+                                  '        </table>' +
+                                  '    </template>' +
+                                  '    <template for="insert">' + strInsertHTML + '</template>' +
+                                  '</gs-envelope>';
+                        
+                        envelopeElement = GS.stringToElement(strHTML);
+                        
+                        document.getElementById('envelope-container').appendChild(envelopeElement);
+                        
+                    } else {
+                        GS.ajaxErrorDialog(response);
+                    }
+                });
+                
+                document.getElementById('envelope-where').value = strWhere;
+                document.getElementById('envelope-ord').value = strOrderBy;
+                document.getElementById('envelope-limit').value = strLimit;
+                document.getElementById('envelope-offset').value = strOffset;
+                
+                document.getElementById('envelope-where').addEventListener('change', function () {
+                    strWhere = this.value;
+                    document.getElementById('envelope-data-editing').refresh();
+                });
+                document.getElementById('envelope-ord').addEventListener('change', function () {
+                    strOrderBy = this.value;
+                    document.getElementById('envelope-data-editing').refresh();
+                });
+                document.getElementById('envelope-limit').addEventListener('change', function () {
+                    strLimit = this.value;
+                    document.getElementById('envelope-data-editing').refresh();
+                });
+                document.getElementById('envelope-offset').addEventListener('change', function () {
+                    strOffset = this.value;
+                    document.getElementById('envelope-data-editing').refresh();
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <gs-panel id="panel">
+            <gs-page>
+                <gs-header><h3 id="object-name"></h3></gs-header>
+                <gs-body id="envelope-container"></gs-body>
+            </gs-page>
+            <gs-page id="right-bar" style="width: 17em;">
+                <gs-header>
+                    <h3>Data Parameters</h3>
+                </gs-header>
+                <gs-body padded>
+                    <label for="envelope-where">Where:</label>
+                    <gs-text id="envelope-where"></gs-text>
+                    <label for="envelope-ord">Order By:</label>
+                    <gs-text id="envelope-ord"></gs-text>
+                    <label for="envelope-limit">Limit:</label>
+                    <gs-text id="envelope-limit"></gs-text>
+                    <label for="envelope-offset">Offset:</label>
+                    <gs-text id="envelope-offset"></gs-text>
+                </gs-body>
+            </gs-page>
+        </gs-panel>
+    </body>
+</html>

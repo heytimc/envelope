@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <style>
+            gs-body {
+                padding: 0.2em;
+            }
+            /* make the envelopes take up a reasonable amount of space */
+            gs-envelope {
+                height: 300px;
+            }
+        </style>
+        <script>/*
+            window.addEventListener('DOMContentLoaded', function (event) {
+                var strPageBackground, strHeaderFooterLineColor, strDisabledBackground
+                  , strButtonBackground     , strButtonTopLeft     , strButtonBottomRight
+                  , strButtonFocusBackground, strButtonFocusTopLeft, strButtonFocusBottomRight
+                  , strButtonDownBackground , strButtonDownTopLeft , strButtonDownBottomRight
+                  , strTextBackground
+                  , strEnvelopeCellBackground, strEnvelopeHeaderFooterBackground
+                  , strEnvelopeRecordBackground, strEnvelopeRecordSelectedBackground, strEnvelopeRecordEvenBackground
+                  , strFocusBackground, strGeneralSelectedBackground, strGeneralTempSelectedBackground
+                  , strDatePickerButtonBackground, strOptionBackground, strSelectBackground, strComboBackground
+                  , strTheme = 'Green1';
+                
+                if (strTheme === 'Green1') {
+                    //Page Background
+                    strPageBackground = '#EEFFEE';
+                    
+                    //GS-Header and GS-Footer Line Color
+                    strHeaderFooterLineColor = '#224422';
+                    
+                    //Disabled Background
+                    strDisabledBackground = '#CCCCCC'; // 446644
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox Background and Borders
+                    strButtonBackground  = '#BBDDBB';
+                    strButtonTopLeft     = '#DDFFDD';
+                    strButtonBottomRight = '#779977';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Hover) Background and Borders
+                    strButtonHoverBackground  = '#C1EBC1';
+                    strButtonHoverTopLeft     = '#DDFFDD';
+                    strButtonHoverBottomRight = '#779977';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Down) Background and Borders
+                    strButtonDownBackground  = '#668866';
+                    strButtonDownTopLeft     = '#779977';
+                    strButtonDownBottomRight = '#DDFFDD';
+                    
+                    //GS-Text, GS-Date, GS-Number and GS-Memo Background
+                    strTextBackground   = '#FFFFFF';
+                    
+                    //GS-Envelope Background
+                    strEnvelopeCellBackground           = '#FFFFFF';
+                    strEnvelopeHeaderFooterBackground   = '#FFFFFF';
+                    strEnvelopeBackground               = '#E9F1E9';
+                    strEnvelopeRecordBackground         = '#transparent'; //transparent, #DDFFDD
+                    strEnvelopeRecordSelectedBackground = '#FFFFCC'; //transparent, #668866
+                    strEnvelopeRecordEvenBackground     = '#FFFFFF';
+                    
+                    //Focus Background
+                    strFocusBackground = '#FFFFCC'; //668866
+                    
+                    //General Selected Background
+                    strGeneralSelectedBackground = '#FFFFCC'; // 668866
+                    
+                    //General Temporary Selected Background
+                    strGeneralTempSelectedBackground = '#FFFFCC'; // 668866
+                    
+                    //GS-Date Date Picker Button Background
+                    strDatePickerButtonBackground = '#99BB99';
+                    
+                    //GS-Option Background
+                    strOptionBackground = '#BBDDBB';
+                    
+                    //GS-Select Background
+                    strSelectBackground = '#99BB99';
+                    
+                    //GS-Combo Background
+                    strComboBackground = '#99BB99';
+                } else if (strTheme === 'Default' || (strTheme || '') === '') {
+                    //Page Background
+                    strPageBackground = '#F5F5F5';
+                    
+                    //GS-Header and GS-Footer Line Color
+                    strHeaderFooterLineColor = '#000000';
+                    
+                    //Disabled Background
+                    strDisabledBackground = '#D5D5D5';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox Background and Borders
+                    strButtonBackground  = '#EFEFEF';
+                    strButtonTopLeft     = '#D5D5D5';
+                    strButtonBottomRight = '#818181';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Hover) Background and Borders
+                    strButtonHoverBackground  = '#f3f3f3';
+                    strButtonHoverTopLeft     = '#D5D5D5';
+                    strButtonHoverBottomRight = '#818181';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Down) Background and Borders
+                    strButtonDownBackground  = '#DADADA';
+                    strButtonDownTopLeft     = '#818181';
+                    strButtonDownBottomRight = '#D5D5D5';
+                    
+                    //GS-Text, GS-Date, GS-Number and GS-Memo Background
+                    strTextBackground = '#FFFFFF';
+                    
+                    //GS-Envelope Background
+                    strEnvelopeCellBackground           = '#FFFFFF';
+                    strEnvelopeHeaderFooterBackground   = '#FFFFFF';
+                    strEnvelopeBackground               = '#FFFFFF';
+                    strEnvelopeRecordBackground         = '#transparent'; //transparent, #FFFFFF
+                    strEnvelopeRecordSelectedBackground = '#transparent'; //transparent, #FFFFFF
+                    strEnvelopeRecordEvenBackground     = '#F9F9F9';
+                    
+                    //Focus Background
+                    strFocusBackground = '#FFFDDB';//inherit, 
+                    
+                    //General Selected Background
+                    strGeneralSelectedBackground = '#C7E1FF';
+                    
+                    //General Temporary Selected Background
+                    strGeneralTempSelectedBackground = '#E7F2FF';
+                    
+                    //GS-Date Date Picker Button Background
+                    strDatePickerButton = '#EFEFEF';
+                    
+                    //GS-Option Background
+                    strOptionBackground = '#FFFFFF';
+                    
+                    //GS-Select Background
+                    strSelectBackground = '#FFFFFF';
+                    
+                    //GS-Combo Background
+                    strComboBackground = '#FFFFFF';
+                } else if (strTheme === 'Green2') {
+                    //Page Background
+                    strPageBackground = '#FAFFFA';
+                    
+                    //GS-Header and GS-Footer Line Color
+                    strHeaderFooterLineColor = '#000000';
+                    
+                    //Disabled Background
+                    strDisabledBackground = '#D5D5D5';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox Background and Borders
+                    strButtonBackground  = '#EFEFEF';
+                    strButtonTopLeft     = '#D5D5D5';
+                    strButtonBottomRight = '#818181';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Hover) Background and Borders
+                    strButtonHoverBackground  = '#f3f3f3';
+                    strButtonHoverTopLeft     = '#D5D5D5';
+                    strButtonHoverBottomRight = '#818181';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Down) Background and Borders
+                    strButtonDownBackground  = '#DADADA';
+                    strButtonDownTopLeft     = '#818181';
+                    strButtonDownBottomRight = '#D5D5D5';
+                    
+                    //GS-Text, GS-Date, GS-Number and GS-Memo Background
+                    strTextBackground = '#FFFFFF';
+                    
+                    //GS-Envelope Background
+                    strEnvelopeCellBackground           = '#FFFFFF';
+                    strEnvelopeHeaderFooterBackground   = '#FFFFFF';
+                    strEnvelopeBackground               = '#FFFFFF';
+                    strEnvelopeRecordBackground         = '#transparent'; //transparent, #FFFFFF
+                    strEnvelopeRecordSelectedBackground = '#transparent'; //transparent, #FFFFFF
+                    strEnvelopeRecordEvenBackground     = '#F9F9F9';
+                    
+                    //Focus Background
+                    strFocusBackground = '#DDFFDD';//inherit, 
+                    
+                    //General Selected Background
+                    strGeneralSelectedBackground = '#DDFFDD';
+                    
+                    //General Temporary Selected Background
+                    strGeneralTempSelectedBackground = '#DDFFDD';
+                    
+                    //GS-Date Date Picker Button Background
+                    strDatePickerButton = '#EFEFEF';
+                    
+                    //GS-Option Background
+                    strOptionBackground = '#FFFFFF';
+                    
+                    //GS-Select Background
+                    strSelectBackground = '#FFFFFF';
+                    
+                    //GS-Combo Background
+                    strComboBackground = '#FFFFFF';
+                } else if (strTheme === 'Green3') {
+                    //Page Background
+                    strPageBackground = '#EEFFEE';
+                    
+                    //GS-Header and GS-Footer Line Color
+                    strHeaderFooterLineColor = '#224422';
+                    
+                    //Disabled Background
+                    strDisabledBackground = '#446644';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox Background and Borders
+                    strButtonBackground  = '#99BB99';
+                    strButtonTopLeft     = '#DDFFDD';
+                    strButtonBottomRight = '#779977';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Hover) Background and Borders
+                    strButtonHoverBackground  = '#BBDDBB';
+                    strButtonHoverTopLeft     = '#DDFFDD';
+                    strButtonHoverBottomRight = '#779977';
+                    
+                    //GS-Button, GS-Toggle and GS-Checkbox (Down) Background and Borders
+                    strButtonDownBackground  = '#668866';
+                    strButtonDownTopLeft     = '#779977';
+                    strButtonDownBottomRight = '#DDFFDD';
+                    
+                    //GS-Text, GS-Date, GS-Number and GS-Memo Background
+                    strTextBackground   = '#DDFFDD';
+                    
+                    //GS-Envelope Background
+                    strEnvelopeCellBackground           = '#DDFFDD';
+                    strEnvelopeHeaderFooterBackground   = '#DDFFDD';
+                    strEnvelopeBackground               = '#DDFFDD';
+                    strEnvelopeRecordBackground         = '#transparent'; //transparent, #DDFFDD
+                    strEnvelopeRecordSelectedBackground = '#668866'; //transparent, #668866
+                    strEnvelopeRecordEvenBackground     = '#CCEECC';
+                    
+                    //Focus Background
+                    strFocusBackground = '#668866';
+                    
+                    //General Selected Background
+                    strGeneralSelectedBackground = '#668866';
+                    
+                    //General Temporary Selected Background
+                    strGeneralTempSelectedBackground = '#668866';
+                    
+                    //GS-Date Date Picker Button Background
+                    strDatePickerButtonBackground = '#99BB99';
+                    
+                    //GS-Option Background
+                    strOptionBackground = '#99BB99';
+                    
+                    //GS-Select Background
+                    strSelectBackground = '#99BB99';
+                    
+                    //GS-Combo Background
+                    strComboBackground = '#99BB99';
+                }
+                
+                // append selection style to html
+                styleElement = document.createElement('style');
+                strStyle =
+                    'body, gs-body {' +
+                        'background-color: ' + strPageBackground + ';' +
+                    '}' +
+                    'gs-header .border-line, gs-footer .border-line {' +
+                        'outline-color: ' + strHeaderFooterLineColor + ';' +
+                    '}' +
+                    'html body *[disabled],' +
+                    '*[disabled] {' +
+                        'background-color: ' + strDisabledBackground + ';' +
+                    '}' +
+                    'gs-button, gs-toggle, gs-checkbox {' +
+                        'background-color: '        + strButtonBackground + ';' +
+                        'border-left: 2px solid '   + strButtonTopLeft + ';' +
+                        'border-top: 2px solid '    + strButtonTopLeft + ';' +
+                        'border-right: 2px solid '  + strButtonBottomRight + ';' +
+                        'border-bottom: 2px solid ' + strButtonBottomRight + ';' +
+                    '}' +
+                    'gs-button:hover, gs-toggle:hover, gs-checkbox:hover {' +
+                        'background-color: '        + strButtonHoverBackground + ';' +
+                        'border-left: 2px solid '   + strButtonHoverTopLeft + ';' +
+                        'border-top: 2px solid '    + strButtonHoverTopLeft + ';' +
+                        'border-right: 2px solid '  + strButtonHoverBottomRight + ';' +
+                        'border-bottom: 2px solid ' + strButtonHoverBottomRight + ';' +
+                    '}' +
+                    'gs-button.down, gs-toggle.down, gs-checkbox.down {' +
+                        'background-color: '    + strButtonDownBackground + ';' +
+                        'border-left-color: '   + strButtonDownTopLeft + ';' +
+                        'border-top-color: '    + strButtonDownTopLeft + ';' +
+                        'border-right-color: '  + strButtonDownBottomRight + ';' +
+                        'border-bottom-color: ' + strButtonDownBottomRight + ';' +
+                    '}' +
+                    'gs-text, gs-date, gs-number, gs-memo {' +
+                        'background-color: ' + strTextBackground + ';' +
+                    '}' +
+                    'gs-text > input, gs-date > input, gs-number > input, gs-memo > textarea {' +
+                        'background-color: inherit;' +// !important;' +
+                    '}' +
+                    'input:focus,' +
+                    'textarea:focus,' +
+                    'select:focus {' +
+                        'background-color: ' + strFocusBackground + ';' +
+                    '}' +
+                    'gs-envelope .fixed-header-cell {' +
+                        'background-color: ' + strEnvelopeCellBackground + ';' +
+                    '}' +
+                    'gs-envelope .hud-container-top,' +
+                    'gs-envelope .hud-container-bottom {' +
+                        'background-color: ' + strEnvelopeHeaderFooterBackground + ';' +
+                    '}' +
+                    'gs-envelope table {' +
+                        'background-color: ' + strEnvelopeBackground + ';' +
+                    '}' +
+                    'gs-envelope table tbody tr {' +
+                        'background-color: ' + strEnvelopeRecordBackground + ';' +
+                    '}' +
+                    'gs-envelope table tr > [selected] * {' +
+                        'background-color: ' + strEnvelopeRecordSelectedBackground + ';' +
+                    '}' +
+                    'tr:nth-child(even), tr:nth-child(even) > * {' +
+                        'background-color: ' + strEnvelopeRecordEvenBackground + ';' +
+                    '}' +
+                    '*[selected] {' +
+                        'background-color: ' + strGeneralSelectedBackground + ' !important;' +
+                    '}' +
+                    '*[tempselect] {' +
+                        'background-color: ' + strGeneralTempSelectedBackground + ' !important;' +
+                    '}' +
+                    'gs-date .date-picker-button {' +
+                        'background-color: ' + strDatePickerButtonBackground + ';' +
+                    '}' +
+                    'gs-option {' +
+                        'background-color: ' + strOptionBackground + ';' +
+                    '}' +
+                    'gs-select {' +
+                        'background-color: ' + strSelectBackground + ';' +
+                    '}' +
+                    'gs-select > select {' +
+                        'background-color: inherit !important;' +
+                    '}' +
+                    'gs-combo {' +
+                        'background-color: ' + strComboBackground + ';' +
+                    '}' +
+                    'gs-combo input {' +
+                        'background-color: inherit !important;' +
+                    '}';
+                styleElement.innerHTML = strStyle;
+                document.getElementsByTagName('head')[0].appendChild(styleElement);
+            });*/
+        </script>
+        <!--<style>
+            /* COLORS */
+            /* header and footer borders */
+            gs-header .border-line, gs-footer .border-line {
+                outline-color: #224422;
+                /*
+                outline-color: #000000;
+                */
+            }
+            /* disabled */
+            html body *[disabled],
+            *[disabled] {
+                background-color: #446644;
+                /*
+                background-color: #D5D5D5;
+                */
+            }
+            /* basic clickable controls */
+            gs-button, gs-toggle, gs-checkbox {
+                background-color: #99BB99;
+                border-left: 2px solid #DDFFDD;
+                border-top: 2px solid #DDFFDD;
+                border-right: 2px solid #779977;
+                border-bottom: 2px solid #779977;
+                /*
+                background-color: #EFEFEF;
+                border-left: 2px solid #D5D5D5;
+                border-top: 2px solid #D5D5D5;
+                border-right: 2px solid #818181;
+                border-bottom: 2px solid #818181;
+                */
+            }
+            gs-button:hover, gs-toggle:hover, gs-checkbox:hover {
+                background-color: #BBDDBB;
+                border-left: 2px solid #DDFFDD;
+                border-top: 2px solid #DDFFDD;
+                border-right: 2px solid #779977;
+                border-bottom: 2px solid #779977;
+                /*
+                background-color: #f3f3f3;
+                border-left: 2px solid #D5D5D5;
+                border-top: 2px solid #D5D5D5;
+                border-right: 2px solid #818181;
+                border-bottom: 2px solid #818181;
+                */
+            }
+            gs-button.down, gs-toggle.down, gs-checkbox.down {
+                background-color: #668866;
+                border-left-color: #DDFFDD;
+                border-top-color: #DDFFDD;
+                border-right-color: #779977;
+                border-bottom-color: #779977;
+                /*
+                background-color: #DADADA;
+                border-left-color: #818181;
+                border-top-color: #818181;
+                border-right-color: #D5D5D5;
+                border-bottom-color: #D5D5D5;
+                */
+            }
+            /* basic controls */
+            gs-text, gs-date, gs-number, gs-memo {
+                background-color: #DDFFDD;
+                /*
+                background-color: #FFFFFF;
+                */
+            }
+            gs-text > input, gs-date > input, gs-number > input, gs-memo > textarea {
+                background-color: inherit !important;
+            }
+            /* envelope background */
+            gs-envelope .fixed-header-cell {
+                background-color: #DDFFDD;
+                /*
+                background-color: #FFFFFF;
+                */
+            }
+            gs-envelope .hud-container-top,
+            gs-envelope .hud-container-bottom {
+                background-color: #DDFFDD;
+                /*
+                background-color: #FFFFFF;
+                */
+            }
+            gs-envelope table tbody tr {
+                background-color: #DDFFDD;
+                /*
+                background-color: transparent;
+                */
+            }
+            /* focused controls */
+            input:focus,
+            textarea:focus,
+            select:focus {
+                background-color: #668866;
+                /*
+                background-color: #FFFDDB;
+                */
+            }
+            /* selected objects */
+            *[selected] {
+                background-color: #668866 !important;
+                /*
+                background-color: #C7E1FF !important;
+                */
+            }
+            gs-envelope table tr > [selected] * {
+                background-color: #668866;
+                /*
+                background-color: transparent;
+                */
+            }
+            *[tempselect] {
+                background-color: #668866 !important;
+                /*
+                background-color: #E7F2FF !important;
+                */
+            }
+            /* every other child */
+            tr:nth-child(even) {
+                background-color: #CCEECC;
+                /*background-color: #F9F9F9;*/
+            }
+            /*
+            tr:nth-child(even) > * {
+                background-color: #CCEECC;
+                background-color: #F9F9F9;
+            }
+            */
+            /* every other child */
+            gs-date .date-picker-button {
+                background-color: #99BB99;
+                /*
+                background-color: #EFEFEF;
+                */
+            }
+            /* optionbox */
+            gs-option {
+                background-color: #99BB99;
+                /*
+                background-color: #FFFFFF;
+                */
+            }
+            /* select */
+            gs-select {
+                background-color: #99BB99;
+                /*
+                background-color: #FFFFFF;
+                */
+            }
+            gs-select > select {
+                background-color: inherit !important;
+            }
+            /* combo */
+            gs-combo {
+                background-color: #99BB99;
+                /*
+                background-color: #FFFFFF;
+                */
+            }
+            gs-combo input {
+                background-color: inherit !important;
+            }
+        </style>-->
+    </head>
+    <body>
+        <gs-page>
+            <gs-header>
+                <h2>Kitchen Sink</h2>
+            </gs-header>
+            <gs-body>
+                <!--
+                ?test=false
+                
+                GS.pushQueryString('test=true');
+                GS.pushQueryString('test=false');
+                
+                <gs-tracking-button qs="test">test</gs-tracking-button>
+                <gs-skype-button qs="test">test</gs-skype-button>
+                <gs-phone-button qs="test">test</gs-phone-button>
+                <gs-map-button qs="test">test</gs-map-button>
+                <gs-facetime-button qs="test">test</gs-facetime-button>
+                <gs-email-button qs="test">test</gs-email-button>
+                
+                <gs-toggle qs="test">test</gs-toggle>
+                
+                <gs-optionbox qs="test">
+                    <gs-option value="true">true</gs-option>
+                    <gs-option value="false">false</gs-option>
+                </gs-optionbox>
+                <gs-checkbox qs="test"></gs-checkbox>
+                
+                <gs-static qs="test"></gs-static>
+                <gs-text qs="test"></gs-text>
+                <gs-number qs="test"></gs-number>
+                <gs-memo qs="test"></gs-memo>
+                <gs-date qs="test">test</gs-date>
+                
+                <gs-combo qs="test">
+                    <template>
+                        <table>
+                            <tbody>
+                                <tr><td>true</td></tr>
+                                <tr><td>false</td></tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </gs-combo>
+                
+                <gs-listbox qs="test" style="height: auto; border: 1px solid #000000;">
+                    <template>
+                        <table>
+                            <tbody>
+                                <tr><td>true</td></tr>
+                                <tr><td>false</td></tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </gs-listbox>
+                
+                <gs-envelope qs="test" src="test.tpeople" limit="2" style="height: auto; border: 1px solid #000000;" no-huddelete no-hudrefresh no-hudlimit no-hudorderby>
+                    <template for="table">
+                        <table>
+                            <tbody>
+                                <tr><td>{{! row.first_name }}</td></tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </gs-envelope>
+                
+                <gs-form qs="test" src="test.tpeople" style="height: auto; border: 1px solid #000000;">
+                    <template>
+                        <table>
+                            <tbody>
+                                <tr><td>{{! row.first_name }}</td></tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </gs-form>-->
+                
+                <br />
+                <hr />
+                <br />
+                <gs-button id="test_button1">Button</gs-button>
+                <gs-button id="test_button2" disabled>Disabled Button</gs-button>
+                Checkbox:
+                <gs-checkbox id="test_checkbox1"></gs-checkbox><br />
+                Checkbox Disabled:
+                <gs-checkbox id="test_checkbox2" disabled></gs-checkbox><br />
+                Checkbox Triplestate:
+                <gs-checkbox id="test_checkbox3" triplestate></gs-checkbox><br />
+                Grid:
+                <gs-grid>
+                    <gs-block><gs-text placeholder="Text"></gs-text></gs-block>
+                    <gs-block><gs-number placeholder="Number"></gs-number></gs-block>
+                    <gs-block><gs-date placeholder="Date"></gs-date></gs-block>
+                    <gs-block><gs-text placeholder="Disabled Text" disabled></gs-text></gs-block>
+                </gs-grid><br />
+                <label for="test-memo-1">Memo: (<b>test</b>)</label>
+                <gs-memo id="test-memo-1"></gs-memo><br />
+                <label for="test-toggle-1">Toggle:</label>
+                <gs-toggle id="test-toggle-1">Hey</gs-toggle><br />
+                Envelope:
+                <gs-envelope id="test_events" src="test.tpeople" ord="first_name ASC">
+                    <template for="table">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th heading="#">{{! row_number }}</th>
+                                    <td heading="First Name" style="min-width: 120px;"><gs-text mini column="first_name"></gs-text></td>
+                                    <td heading="Last Name"  style="min-width: 120px;"><gs-text mini column="last_name"></gs-text></td>
+                                    <td heading="Birth Date" style="min-width: 122px;"><gs-date mini column="birth_date"></gs-date></td>
+                                    <td heading="Age"        style="min-width: 37px;">{{! row.age }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template for="insert">
+                        First Name:
+                        <gs-text column="first_name"></gs-text><br />
+                        
+                        Last Name:
+                        <gs-text column="last_name"></gs-text><br />
+                        
+                        Birth Date:
+                        <gs-date column="birth_date"></gs-date><br />
+                    </template>
+                </gs-envelope>
+                <br />
+                Optionbox:
+                <gs-optionbox id="test_optionbox1" value="3">
+                    <gs-option value="0">Defcon 1</gs-option>
+                    <gs-option value="1">Defcon 2</gs-option>
+                    <gs-option value="2">Defcon 3</gs-option>
+                    <gs-option value="3">Defcon 4</gs-option>
+                    <gs-option value="4">Defcon 5</gs-option>
+                </gs-optionbox><br />
+                Select with Option Groups:
+                <gs-select>
+                    <option>test1</option>
+                    <option>test2</option>
+                    <option>test3</option>
+                    <optgroup label="test group">
+                        <option>test4</option>
+                        <option>test5</option>
+                        <option>test6</option>
+                    </optgroup>
+                    <optgroup label="test group">
+                        <option>test7</option>
+                        <option>test8</option>
+                        <option>test9</option>
+                    </optgroup>
+                </gs-select><br />
+                Combobox:
+                <gs-combo>
+                    <template for="table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Column 1</th>
+                                    <th>Column 2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr value="1">
+                                    <td>qwer</td>
+                                    <td>rewq</td>
+                                </tr>
+                                <tr value="2">
+                                    <td>asdf</td>
+                                    <td>fdsa</td>
+                                </tr>
+                                <tr value="3">
+                                    <td>zxcv</td>
+                                    <td>vcxz</td>
+                                </tr>
+                                <tr value="4">
+                                    <td>rtyu</td>
+                                    <td>uytr</td>
+                                </tr>
+                                <tr value="5">
+                                    <td>fghjjhg</td>
+                                    <td>jhgf</td>
+                                </tr>
+                                <tr value="6">
+                                    <td>uiop</td>
+                                    <td>lkhj</td>
+                                </tr>
+                                <tr value="7">
+                                    <td>vbnm</td>
+                                    <td>mnbv</td>
+                                </tr>
+                                <tr value="8">
+                                    <td>2345rtyu</td>
+                                    <td>6543uytr</td>
+                                </tr>
+                                <tr value="9">
+                                    <td>4567fghjjhg</td>
+                                    <td>4321jhgf</td>
+                                </tr>
+                                <tr value="10">
+                                    <td>56789uiop</td>
+                                    <td>0789lkhj</td>
+                                </tr>
+                                <tr value="11">
+                                    <td>356vbnm</td>
+                                    <td>6543mnbv</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </gs-combo>
+            </gs-body>
+            <gs-footer><center><h3>footer</h3></center></gs-footer>
+        </gs-page>
+    </body>
+</html>

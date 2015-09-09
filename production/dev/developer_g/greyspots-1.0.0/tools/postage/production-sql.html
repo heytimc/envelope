@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Prodution SQL</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="sql.js" type="text/javascript"></script>
+        <link href="sql.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script>
+            var editor;
+            
+            window.addEventListener('load', function () {
+                window.Range = require('ace/range').Range;
+                window.snippetManager = require('ace/snippets').snippetManager;
+                
+                //
+                editor = ace.edit('area');
+                
+                editor.setTheme('ace/theme/eclipse');
+                editor.getSession().setMode('ace/mode/pgsql');
+                editor.setShowPrintMargin(false);
+                editor.setDisplayIndentGuides(true);
+                editor.setShowFoldWidgets(false);
+                editor.session.setUseWrapMode('free');
+                editor.setBehavioursEnabled(false);
+                editor.$blockScrolling = Infinity; // <== blocks a warning
+                
+                editor.setOptions({
+                    'enableBasicAutocompletion': true,
+                    'enableSnippets'           : true,
+                    'enableLiveAutocompletion' : true
+                });
+                
+                if (evt.touchDevice) {
+                    editor.setOptions({
+                        maxLines: Infinity
+                    });
+                    
+                } else {
+                    document.getElementById('area').style.height = '100%';
+                }
+                
+                editor.resize(true);
+                editor.focus();
+                
+                document.body.addEventListener('keydown', function (event) {
+                    var intKeyCode = event.which || event.keyCode;
+                    
+                    if (intKeyCode === 116) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        runSQL();
+                    }
+                });
+            });
+            
+            window.onbeforeunload = function () {
+                if (editor.getValue().trim().length > 0) {
+                    return 'This code is not saved. If you want to keep this code please copy it.';
+                }
+            };
+        </script>
+    </head>
+    <body class="blue">
+        <gs-page>
+            <gs-header>
+                <div flex-horizontal>
+                    <h3 flex>Production SQL</h3>
+                    <gs-button onclick="runSQL();" icononly icon="play"></gs-button>
+                </div>
+                <gs-button onclick="dialogProcess()">Process Manager</gs-button>
+            </gs-header>
+            <gs-body id="container">
+                <div id="area"></div>
+            </gs-body>
+        </gs-page>
+        <div id="results-pane" flex-vertical flex-fill>
+            <div flex-horizontal>
+                <h4 id="results-title" flex></h4>
+                <gs-button id="button-drawer-height-small" onclick="setDrawerHeight('small');" remove-right><b>_</b></gs-button>
+                <gs-button id="button-drawer-height-half" onclick="setDrawerHeight('half');" remove-all>&#9604;</gs-button>
+                <gs-button id="button-drawer-height-full" onclick="setDrawerHeight('full');" remove-all>&#9608;</gs-button>
+                <gs-button icononly icon="times" onclick="document.body.classList.remove('results-show'); editor.resize();" remove-left></gs-button>
+            </div>
+            <div id="results" flex></div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><h3>Memo:</h3></gs-header>
+            <gs-body padded>
+                no attributes:
+                <gs-memo id="memo0" qs="test"></gs-memo><br />
+                
+                rows attribute:
+                <gs-memo id="memo1" rows="1"></gs-memo><br />
+                
+                value attribute:
+                <gs-memo id="memo2" value="asdf"></gs-memo><br />
+                
+                disabled and value attributes:
+                <gs-memo id="memo3" disabled value="asdf"></gs-memo><br />
+                
+                onchange attribute:
+                <gs-memo id="memo4" onchange="alert(this.value);"></gs-memo><br />
+                
+                no-resize-handle attribute:
+                <gs-memo id="memo5" no-resize-handle></gs-memo><br />
+                
+                no-resize-handle, autoresize and value attributes:
+                <gs-memo id="memo6" no-resize-handle noresize autoresize value="asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf"></gs-memo><br />
+                
+                placeholder:
+                <gs-memo id="memo7" placeholder="A Memo"></gs-memo><br />
+                
+                disabled and placeholder attributes:
+                <gs-memo id="memo8" disabled placeholder="A Memo"></gs-memo><br />
+                
+                flex-horizontal:
+                <hr />
+                <div flex-horizontal>
+                    <label for="memo9">flex-horizontal memo</label>
+                    <gs-memo id="memo9" flex></gs-memo>
+                </div><br />
+                
+                flex-vertical:
+                <hr />
+                <div flex-vertical style="height: 200px;">
+                    <label for="memo10">flex-vertical memo</label>
+                    <gs-memo id="memo10" flex></gs-memo>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

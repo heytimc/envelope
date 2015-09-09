@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Standard Ajax Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>Standard Ajax Functions</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Functions:</b>
+                <div class="doc-section doc-mono">
+                    GS.ajaxJSON('&lt;LINK&gt;', '&lt;PARAMETER-STRING&gt;', function (data, error) {<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;...<br />
+                    }, &lt;FRONT-END-TIMEOUT&gt;);<br /><br />
+                    GS.ajaxText('&lt;LINK&gt;', '&lt;PARAMETER-STRING&gt;', function (data, error) {<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;...<br />
+                    });
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    These functions used for traditional, callback-based ajax calls.
+                </div>
+                
+                <b class="doc-header">Database Functionality For Examples:</b>
+                <div class="doc-section">
+                    Examples on this page require the "gsdoc" schema to work properly. To enable the demonstration of features that require database functionality, please click the following button to create or refresh the "gsdoc" schema. <br />
+                    The "gsdoc" schema is only installed temporarily. It is lost after every Abandon, Pull or Release.<br />
+                    <gs-button id="button-documentation-schema">Create/Refresh Documentation Schema</gs-button>
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>GS.ajaxJSON Example:</b><br />
+                        The GS.ajaxJSON function makes an ajax call and expects only valid JSON to come back from the server. If no valid JSON comes back it is considered an error. The data that is returned is given to the javascript callback as a Javascript Object. In this example we are passing the "gsdoc.action_ajax_test_json" function a parameter string and the function is returning it back to us. Note: we are returning the parameter string with double quotes around it so that it be valid when it is put into the JSON response. You could also return a JSON object of your own if it is a valid JSON.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="4">
+                            <gs-button onclick="testAjax()">Run Ajax</gs-button>
+                            <div id="result"></div>
+                        </template>
+                        <template for="js" height="10">
+                            function testAjax() {
+                                GS.ajaxJSON('/v1/cluster/gsdoc.action_ajax_test_json', 'testparameter=test', function (data) {
+                                    document.getElementById('result').textContent = JSON.stringify(data);
+                                });
+                            }
+                        </template>
+                        <template for="db" height="20">
+                            CREATE OR REPLACE FUNCTION gsdoc.action_ajax_test_json(text)
+                              RETURNS text AS
+                            $BODY$
+                            BEGIN
+                                RETURN '"' || $1 || '"';
+                                --RETURN '{"test": "' || $1 || '"}';
+                            END;
+                            $BODY$
+                            LANGUAGE plpgsql VOLATILE
+                            COST 100;
+                            ALTER FUNCTION gsdoc.action_ajax_test_json(text) OWNER TO postgres;
+                            GRANT ALL ON FUNCTION gsdoc.action_ajax_test_json(text) TO normal_g;
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>GS.ajaxText Example:</b><br />
+                        The GS.ajaxText function makes an ajax call and expects text to come back from the server. The data that is returned is given to the javascript callback as a string. Note: the "accept_" type of function expects you to return the response headers.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="4">
+                            <gs-button onclick="testAjax()">Run Ajax</gs-button>
+                            <div id="result"></div>
+                        </template>
+                        <template for="js" height="10">
+                            function testAjax() {
+                                GS.ajaxText('/v1/cluster/gsdoc.accept_ajax_test', '',
+                                            function (data) {
+                                    document.getElementById('result').textContent = data;
+                                });
+                            }
+                        </template>
+                        <template for="db" height="21">
+                            CREATE OR REPLACE FUNCTION gsdoc.accept_ajax_test(text)
+                              RETURNS text AS
+                            $BODY$
+                            BEGIN
+                                RETURN E'HTTP/1.1 200 OK\r\n' ||
+                                  E'Content-Type: text/plain\r\n\r\n' ||
+                                  E'This is some test text.\r\n';
+                            END;
+                            $BODY$
+                            LANGUAGE plpgsql VOLATILE
+                            COST 100;
+                            ALTER FUNCTION gsdoc.accept_ajax_test(text) OWNER TO postgres;
+                            GRANT ALL ON FUNCTION gsdoc.accept_ajax_test(text) TO normal_g;
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Ajax Error Handling Example:</b><br />
+                        The GS.ajaxJSON and GS.ajaxText functions both use the same system for ajax error handling.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="4">
+                            <gs-button onclick="testAjax()">Run Ajax</gs-button>
+                        </template>
+                        <template for="js" height="18">
+                            function testAjax() {
+                                GS.ajaxJSON('/v1/cluster/gsdoc.action_ajax_test_error', '', function (data, error) {
+                                    // if there was no error
+                                    if (!error) {
+                                        // do stuff here
+                                        
+                                    // else there was no error
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                        <template for="db" height="21">
+                            CREATE OR REPLACE FUNCTION gsdoc.action_ajax_test_error(text)
+                              RETURNS text AS
+                            $BODY$
+                            BEGIN
+                                RETURN 'This is a piece of text... Hello world...' || nonexistentschema.function(); -- sql error here
+                            END;
+                            $BODY$
+                            LANGUAGE plpgsql VOLATILE
+                            COST 100;
+                            ALTER FUNCTION gsdoc.action_ajax_test_error(text) OWNER TO postgres;
+                            GRANT ALL ON FUNCTION gsdoc.action_ajax_test_error(text) TO normal_g;
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>GS.ajaxJSON Front End Timeout Example:</b><br />
+                        The GS.ajaxJSON function has an optional parameter for timing out in the front end. The parameter takes a number of milliseconds and if that amount of time has been reached and the ajax still hasn't returned: it aborts the ajax call. In this example the ajax call has been set to timeout after 5 seconds (5000 milliseconds) and the function we are testing with is set to run for 10 seconds long before returning.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="4">
+                            <gs-button onclick="testAjax()">Run Ajax</gs-button>
+                        </template>
+                        <template for="js" height="18">
+                            function testAjax() {
+                                GS.addLoader('documentation', 'Please Wait...');
+                                GS.ajaxJSON('/v1/cluster/gsdoc.action_ajax_test_timeout', '', function (data, error) {
+                                    GS.removeLoader('documentation');
+                                    if (!error) {
+                                        
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                }, 5000);
+                            }
+                        </template>
+                        <template for="db" height="21">
+                            CREATE OR REPLACE FUNCTION gsdoc.action_ajax_test_timeout(text)
+                              RETURNS text AS
+                            $BODY$
+                            BEGIN
+                                SELECT pg_sleep(10);
+                                RETURN 'test';
+                            END;
+                            $BODY$
+                            LANGUAGE plpgsql VOLATILE
+                            COST 100;
+                            ALTER FUNCTION gsdoc.action_ajax_test_timeout(text) OWNER TO postgres;
+                            GRANT ALL ON FUNCTION gsdoc.action_ajax_test_timeout(text) TO normal_g;
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

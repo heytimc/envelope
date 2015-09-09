@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>String Padding Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>String Padding Functions</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Functions:</b>
+                <div class="doc-section doc-mono">
+                    GS.rightPad(<i>&lt;STRING-TO-PAD&gt;</i>, <i>&lt;STRING-TO-PAD-WITH&gt;</i>, <i>&lt;LENGTH-TO-PAD-TO&gt;</i>);<br />
+                    GS.leftPad(<i>&lt;STRING-TO-PAD&gt;</i>, <i>&lt;STRING-TO-PAD-WITH&gt;</i>, <i>&lt;LENGTH-TO-PAD-TO&gt;</i>);
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    The GS.rightPad and GS.leftPad functions are for adding characters to a string to make it a certain length or longer. The primary use of this is for when creating a text representation of a date object. You may want a date that looks like this: "1-1-2015" to look like this: "01-01-2015" or you may want a date that looks like this: "12-1-2015" to look like this: "12-01-2015". This is created using padding functions.
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>Skeleton Example:</b><br />
+                        This is a basic example of GS.rightPad and GS.leftPad. The four character string "test" will be padded by asterisks to be six characters long.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="6">
+                            <gs-button onclick="testPadRight()">Right Padding</gs-button>
+                            <gs-button onclick="testPadLeft()">Left Padding</gs-button>
+                            <div id="result"></div>
+                        </template>
+                        <template for="js" height="14">
+                            function testPadRight() {
+                                document.getElementById('result').textContent = GS.rightPad('test', '*', 6);
+                            }
+                            
+                            function testPadLeft() {
+                                document.getElementById('result').textContent = GS.leftPad('test', '*', 6);
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Date String Example:</b><br />
+                        This is an example of using GS.leftPad to pad the numbers in a date string.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="8">
+                            <gs-button onclick="testDatePadded()">Date With Padding</gs-button>
+                            <gs-button onclick="testDateNotPadded()">Date Without Padding</gs-button>
+                            <div id="result"></div>
+                        </template>
+                        <template for="js" height="20">
+                            var testDate = new Date('1/1/2015');
+                            
+                            function testDatePadded() {
+                                document.getElementById('result').textContent =
+                                    GS.leftPad(testDate.getMonth() + 1, '0', 2) + '/' +
+                                    GS.leftPad(testDate.getDate(), '0', 2) + '/' +
+                                    (testDate.getFullYear());
+                            }
+                            
+                            function testDateNotPadded() {
+                                document.getElementById('result').textContent =
+                                    (testDate.getMonth() + 1) + '/' +
+                                    (testDate.getDate()) + '/' +
+                                    (testDate.getFullYear());
+                            }
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

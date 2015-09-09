@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Insert Record Element Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>Insert Record Element</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Record Element:</b>
+                <div class="doc-section doc-mono">
+                    
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    
+                </div>
+                
+                <b class="doc-header">Database Functionality For Examples:</b>
+                <div class="doc-section">
+                    Examples on this page require the "gsdoc" schema to work properly. To enable the demonstration of features that require database functionality, please click the following button to create or refresh the "gsdoc" schema. <br />
+                    The "gsdoc" schema is only installed temporarily. It is lost after every Abandon, Pull or Release.<br />
+                    <gs-button id="button-documentation-schema">Create/Refresh Documentation Schema</gs-button>
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>Skeleton Example:</b><br />
+                        This is a basic &lt;gs-insert&gt; element. When the "submit" method is called the element makes an ajax call for the table or view named in the "src" attribute and attempts to insert to it.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="18">
+                            <gs-insert id="insert-test" src="gsdoc.tpeople">
+                                <label for="first_name">First Name:</label>
+                                <gs-text id="first_name" column="first_name"></gs-text>
+                                <br />
+                                <label for="last_name">Last Name:</label>
+                                <gs-text id="last_name" column="last_name"></gs-text>
+                                <br />
+                                <gs-button onclick="document.getElementById('insert-test').submit();">Done</gs-button>
+                            </gs-insert>
+                        </template>
+                    </gs-doc-example>
+                    
+                    
+                    <div class="doc-example-description">
+                        <b>Attribute "addin":</b><br />
+                        The "addin" attribute adds data to the insert that the user does not see. In this example the "first_name" column will be inserted with the value "Blackberries" even though the user did not type it in.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="13">
+                            <gs-insert id="insert-test" src="gsdoc.tpeople" addin="first_name=Blackberries">
+                                <label for="last_name">Last Name:</label>
+                                <gs-text id="last_name" column="last_name"></gs-text>
+                                <br />
+                                <gs-button onclick="document.getElementById('insert-test').submit();">Done</gs-button>
+                            </gs-insert>
+                        </template>
+                    </gs-doc-example>
+                    
+                    
+                    <div class="doc-example-description">
+                        <b>Attribute "addin" And The Query String:</b><br />
+                        The "addin" attribute can connect to the query string using doT.js. In this example the "first_name" column will get it's value from the query string column "people_id"
+                    </div>
+                    <gs-doc-example query-string="people_id=2341">
+                        <template for="html" height="20">
+                            <gs-insert id="insert-test" src="gsdoc.tpeople_line" addin="people_id={{! qs.people_id }}">
+                                <label for="pet_name">Pet Name:</label>
+                                <gs-text id="pet_name" column="pet_name"></gs-text>
+                                <br />
+                                <label for="birth_date">Birth Day:</label>
+                                <gs-date id="birth_date" column="birth_date" value="1-1-2015"></gs-date>
+                                <br />
+                                <gs-button onclick="document.getElementById('insert-test').submit();">Done</gs-button>
+                            </gs-insert>
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

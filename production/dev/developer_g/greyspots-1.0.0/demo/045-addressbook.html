@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Address Book</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-panel id="panel" left-bar="show">
+            <gs-page id="left-bar" style="width: 17em;">
+                <gs-header><gs-search id="contactsearch" qs="contactsearch"></gs-search></gs-header>
+                <gs-body>
+                    <gs-listbox id="contactlist" src="adr.tcard_list" hide="id" ord="name ASC" letter-dividers
+                        letter-scrollbar refresh-on-querystring-values="id" qs="id"
+                        where="{{! GS.searchToWhere('name', qs.contactsearch) }}" onchange="GS.pushQueryString('id=' + this.value)"></gs-listbox>
+                </gs-body>
+            </gs-page>
+            <gs-switch>
+                <template for="none">
+                    <center><h2>Nothing Selected</h2></center>
+                </template>
+                <template for="detail"></template>
+                <template for="edit"></template>
+            </gs-switch>
+        </gs-panel> 
+    </body>
+</html>

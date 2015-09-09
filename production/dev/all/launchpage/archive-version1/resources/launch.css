@@ -1,0 +1,84 @@
+body {
+    font-family: 'Bank Gothic', Verdana, Arial, Tahoma, sans-serif;
+    line-height: 0.7em;
+}
+#header {
+    background-color: #006E00;
+}
+#header-title {
+    color: #FFFFFF;
+}
+.header-link {
+    display: inline-block;
+    text-align: center;
+    color: #FFFFFF;
+}
+#whom {
+    font-size: 0.6em;
+}
+#home-link {
+    display: block;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+/* larger screens */
+@media only screen and (min-width: 741px) {
+    #header {
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        
+        flex-direction: row;
+        -ms-flex-direction: row;
+        -webkit-flex-direction: row;
+        
+        align-items: flex-end;
+        -ms-align-items: flex-end;
+        -webkit-align-items: flex-end;
+    }
+    #header-title {
+        padding: 0.25em 0 0 0;
+        
+        -webkit-box-flex: 1;
+        -moz-box-flex: 1;
+        width: 100%;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+    }
+    #link-container {
+        display: inline-block;
+    }
+}
+
+/* smaller screens */
+@media only screen and (max-width: 740px) {
+    #product-name {
+        display: block;
+        text-align: center;
+    }
+    #whom {
+        display: block;
+        text-align: center;
+        font-size: 0.5em;
+    }
+    #link-container {
+        margin-top: 0.3em;
+    }
+    #link-container > .header-link {
+        width: 25%;
+        float: left;
+    }
+}
+
+/* really small screens */
+@media only screen and (max-width: 360px) {
+    #link-container > .header-link {
+        width: 50%;
+        float: left;
+        margin-top: 0.5em;
+    }
+}

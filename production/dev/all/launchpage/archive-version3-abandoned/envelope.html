@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Install</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="resources/launch.js" type="text/javascript"></script>
+        <link href="resources/launch.css" type="text/css" rel="stylesheet" />
+        
+        <script>
+            function purchase(strItem) {
+                if (strItem === 'binary') {
+                    GS.dialog({
+                        'header': 'Binary Download',
+                        'content':  ml(function () {/*
+                                        <br />
+                                        <gs-grid widths="1,1">
+                                            <gs-block><br /><center>Envelope Binary ($39)</center></gs-block>
+                                            <gs-block>
+                                                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                    <input type="hidden" name="cmd" value="_s-xclick">
+                                                    <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                                                    ">
+                                                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                                </form>
+                                            </gs-block>
+                                        </gs-grid>
+                                        <br />
+                                    */})
+                    });
+                } else if (strItem === 'cloud') {
+                    GS.dialog({
+                        'header': 'Standard Performance Cloud',
+                        'content': ml(function () {/*
+                                    <br />
+                                    <gs-grid>
+                                        <gs-block><br /><center>Envelope for: Cloud ($99 / Per Month)</center></gs-block>
+                                        <gs-block>
+                                            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                <input type="hidden" name="cmd" value="_s-xclick">
+                                                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                                                ">
+                                                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                            </form>
+                                        </gs-block>
+                                    </gs-grid>
+                                    <br />
+                                */})
+                    });
+                } else if (strItem === 'onsite') {
+                    GS.dialog({
+                        'header': 'Onsite Server',
+                        'content': ml(function () {/*
+                                    <br />
+                                    <gs-grid>
+                                        <gs-block><br /><center>Envelope and Intel NUC ($999)</center></gs-block>
+                                        <gs-block>
+                                            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                <input type="hidden" name="cmd" value="_s-xclick">
+                                                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                                                ">
+                                                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                            </form>
+                                        </gs-block>
+                                    </gs-grid>
+                                    <br />
+                                */})
+                    });
+                } else if (strItem === 'high-perf-cloud') {
+                    GS.dialog({
+                        'header': 'High Performance Cloud',
+                        'content': ml(function () {/*
+                                    <br />
+                                    <gs-grid>
+                                        <gs-block><br /><center>Envelope for: High Performance Cloud ($199 / Per Month)</center></gs-block>
+                                        <gs-block>
+                                            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                                                <input type="hidden" name="cmd" value="_s-xclick">
+                                                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                                                ">
+                                                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                                                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                                            </form>
+                                        </gs-block>
+                                    </gs-grid>
+                                    <br />
+*/})
+                    });
+                }
+            }
+        </script>
+        
+        <style>
+            #product-name h1 {
+                margin: 0;
+            }
+            #product-links {
+                
+            }
+            #product-overview {
+                
+            }
+            #product-get {
+                
+            }
+        </style>
+    </head>
+    <body>
+        <gs-page>
+            <gs-header class="header-row green">
+                <h2 class="row-title">Workflow Products, L.L.C.</h2>
+                <div class="link-container">
+                    <a class="row-link" target="_self" href="index.html">Products</a>
+                    <a class="row-link" target="_self" href="support.html">Support</a>
+                </div>
+            </gs-header>
+            <gs-body padded>
+                <center id="product-name"><h1>Envelope Server</h1></center>
+                <center id="product-links">
+                    <a href="#product-overview">Overview</a>
+                    <a href="#product-get">Get</a>
+                </center>
+                <div id="product-overview">
+                    <center><h4>Envelope Server Overview</h4></center>
+                    <!--
+                    <h3>Who is this for?</h3>
+                    Envelope server is for developers who need a database-driven website for their clients, their customers, themselves or anyone.
+                    
+                    <h3>What is it?</h3>
+                    Envelope Server is an application development platform. Envelope server has a few key features that may interest you:
+                    <ul>
+                        <li>The API for connecting to the database is fixed. So you don't have to create a new link for every view, table or function.</li>
+                        <li>So that you can put security where it belongs, in the database.</li>
+                        <li>Envelope Server comes with a UI that fills in the missing features of HTML, like a combobox.</li>
+                    </ul>
+                    
+                    <h3>What can it do?</h3>
+                    Envelope Server is capable of many things:
+                    <ul>
+                        <li>Data entry and storage</li>
+                        <li>Reporting</li>
+                        <li>File Storage</li>
+                    </ul>
+                    
+                    <h3>What kind of apps can it make?</h3>
+                    Here are some examples of what it can make:
+                    <ul>
+                        <li>Accounting software</li>
+                        <li>Inventory software</li>
+                        <li>Wiki software</li>
+                        <li>Address book software</li>
+                    </ul>
+                    -->
+                    
+                    I've just built this great PostgreSQL database. How do I get it to my users?
+                    <br /><br />
+                    A full time developer might build a web application. But web applications are complex. Many development environments, web application frameworks and programming languages exist to make web applications possible but none of them make creating a web application easy.
+                    <br /><br />
+                    Typically, writing a web application involves learning a programming language for building the server. Which means you need to learn about all the ways a webpage can talk to a server and make sure that you don't introduce security problems. Sometimes there are performance issues or new requirements that could lead to a re-write. 
+                    <br /><br />
+                    But that's just the server side. Then you've got to write the client. HTML, CSS and what if we need more than just a static web page? There are many Javascript frameworks out there to help because javascript is complex. 
+                    <br /><br />
+                    Overall, modern web development isn't easy for a database administrator. 
+                    <br /><br />
+                    Its 2015, we have the technology! I want an easy way to put a website on top of my PostgreSQL database. How easy can it get?
+                    <br /><br />
+                    Ideally, the server would be a fixed engine that exposed my database to the local network or even the internet. It would provide a complete API that meant I didn't need to learn server programming at all. I can configure the server to point to my PostgreSQL database, start it up and start writing my web app.
+                    <br /><br />
+                    Then, if web browser vendors could supply us with HTML tags to do what we want, like &#60;my-header&#62; or &#60;my-combobox&#62;. Or how about what we really want: &#60;my-table&#62;. That would make our lives a lot easier! 
+                    <br /><br />
+                    Introducing Envelope Server!
+                    <br /><br />
+                    Envelope Server is a complete web app platform that makes building database driven web apps easy with just HTML, basic Javascript and SQL!
+                    <br /><br />
+                    Download the Envelope Server and configure it to point at your database cluster. Now you've now got an engine that exposes your database using a fixed API. Security is handled by PostgreSQL so your users log in to Envelope using their PostgreSQL user name and password. From there all requests and security are handled by Envelope Server using encrypted cookies.
+                    <br /><br />
+                    But what about the HTML? Until recently, we were stuck with the HTML that browser vendors granted us. Web Components and X-Tags have changed all that. Envelope Server comes with a library of new HTML tags that make building a web app easy. Ever wonder when browser vendors were going to give us a great combo box? Don't wait any longer! Envelope Server comes with all the HTML tags you've been missing, and that makes your HTML a lot easier to read, write and debug. Have a look at an example with attributes removed:
+                    <br /><br />
+                    <pre>
+    &#60;gs-page&#62;
+    &#60;gs-header&#62;
+        &#60;gs-button&#62;&#60;&#47;gs-button&#62;
+        &#60;h3 flex&#62;Detail Page&#60;&#47;h3&#62;
+        &#60;gs-button&#62;&#60;&#47;gs-button&#62;
+    &#60;&#47;gs-header&#62;
+    &#60;gs-body&#62;
+        &#60;gs-form&#62;
+            &#60;template&#62;
+               &#60;h3&#62;An example body.&#60;&#47;h3&#62;
+            &#60;&#47;template&#62;
+        &#60;&#47;gs-form&#62;
+    &#60;&#47;gs-body&#62;
+    &#60;gs-footer&#62;
+        &#60;gs-button&#62;&#60;&#47;gs-button&#62;
+        &#60;gs-button&#62;&#60;&#47;gs-button&#62;
+    &#60;&#47;gs-footer&#62;
+    &#60;&#47;gs-page&#62;
+                    </pre>
+                    
+                    That's a lot easier to read than your typical web app! Check out the documentation for a complete list of tags and their attributes. There are lots of examples and sample code that you can play with. All our HTML components are mobile aware and make it easy to have your application look good whether its on a phone or on a desktop.
+                </div>
+                <div id="product-get">
+                    <center><h4>Get Envelope Server</h4></center>
+                    <gs-grid padded reflow-at="760px">
+                        <gs-block>
+                            <div class="option-container">
+                                <div class="option-name">Binary Download</div>
+                                <div class="option-body">
+                                    Download and install it on your own server.
+                                    <br /><br />
+                                    <gs-grid widths="1,1">
+                                        <gs-block>Mac OS X</gs-block>
+                                        <gs-block><gs-button href="" target="_blank">Download</gs-button></gs-block>
+                                        
+                                        <gs-block>Linux</gs-block>
+                                        <gs-block><gs-button href="" target="_blank">Download</gs-button></gs-block>
+                                        
+                                        <gs-block>FreeBSD</gs-block>
+                                        <gs-block><gs-button href="" target="_blank">Download</gs-button></gs-block>
+                                    </gs-grid>
+                                </div>
+                                <div class="option-price"><gs-button onclick="purchase('binary')">$39 / Per Server</gs-button></div>
+                            </div>
+                        </gs-block>
+                        <gs-block>
+                            <div class="option-container">
+                                <div class="option-name">Cloud</div>
+                                <div class="option-body">We'll create and install Envelope on a Linode Instance for you.<br />Managed By WFP</div>
+                                <div class="option-price"><gs-button onclick="purchase('cloud')">$99 / Per Month</gs-button></div>
+                            </div>
+                            <br />
+                            <div class="option-container">
+                                <div class="option-name">High Performance Cloud</div>
+                                <div class="option-body">We'll create and install Envelope on a high preformance Linode Instance for you.<br />Managed By WFP</div>
+                                <div class="option-price"><gs-button onclick="purchase('high-perf-cloud')">$199 / Per Month</gs-button></div>
+                            </div>
+                        </gs-block>
+                        <gs-block>
+                            <div class="option-container">
+                                <div class="option-name">Onsite Server</div>
+                                <div class="option-body">We'll mail you an Intel NUC installed with FreeBSD and Envelope.</div>
+                                <div class="option-price"><gs-button onclick="purchase('onsite')">$999</gs-button></div>
+                            </div>
+                        </gs-block>
+                    </gs-grid>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

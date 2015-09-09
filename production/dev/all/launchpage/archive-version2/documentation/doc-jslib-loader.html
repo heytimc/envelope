@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Loader Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>Loader</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Function:</b>
+                <div class="doc-section doc-mono">
+                    GS.addLoader
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    This function puts a modal spinner with optional text over an element or over the whole document. To remove a loader use the function GS.removeLoader <span class="hint">(for more information on the use of GS.removeLoader: see examples)</span>.
+                </div>
+                
+                <b class="doc-header">Parameters:</b>
+                <div class="doc-section">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Input</th>
+                                <th class="doc-small-header">Optional</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th heading="#">1</th>
+                                <td heading="Name">Loader Class or Target</td>
+                                <td heading="Input">A CSS class <span class="hint">(covers the viewport)</span> or<br />An HTML element <span class="hint">(covers an element)</span></td>
+                                <td heading="Optional">Yes</td>
+                                <td heading="Description">This parameter is for telling the function where to put the loader. It is also for being able to later remove the loader.</td>
+                            </tr>
+                            <tr>
+                                <th heading="#">2</th>
+                                <td heading="Name">Loader Text</td>
+                                <td heading="Input">HTML String</td>
+                                <td heading="Optional">Yes</td>
+                                <td heading="Description">This is the content of the loader.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <b class="doc-header">Skeleton Example:</b>
+                <div class="doc-section doc-mono">
+                    GS.addLoader('loading-contacts', 'Loading...');
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">This is an example of a loader that covers the viewport then after an ajax call completes: the loader is removed.</div>
+                    <gs-doc-example>
+                        <template for="html"><gs-button onclick="testLoader()">Loader</gs-button></template>
+                        <template for="js">function testLoader() {
+    GS.addLoader('test-loader', 'This is a test loader...');
+    
+    GS.ajaxJSON('/v1/env/action_info', '', function () {
+        GS.removeLoader('test-loader');
+    });
+}</template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">This is an example of a loader covering an element. Notice in the CSS for the target we have the style "position: relative;" this makes the loader to constrain itself to the target, if you were to remove it the loader would cover the whole window.</div>
+                    <gs-doc-example>
+                        <template for="html"><gs-button onclick="GS.addLoader(document.getElementById('loader-target'))">Add Loader</gs-button>
+
+<gs-button onclick="GS.removeLoader(document.getElementById('loader-target'))">Remove Loader</gs-button>
+<br />
+<div id="loader-target" style="position:relative; height:6em; border: 1px solid #000000;">Loader Target</div></template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

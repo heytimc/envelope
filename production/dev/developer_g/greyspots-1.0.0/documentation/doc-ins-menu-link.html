@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Grid Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>How To Add Links To The Main Menu</h3></center></gs-header>
+            <gs-body padded>
+                <div class="doc-section">
+                    Open the "File Manager"<br />
+                    Navigate to the "all" folder<br />
+                    Open the "File Editor" for the "index.html" file<br />
+                    Find the text '&lt;div id="user-app-list-container"&gt;'<br />
+                    Inside the "user-app-list-container" div element create a new &lt;gs-button&gt; element<br />
+                    Fill in the text of the button<br />
+                    Add the "target" attribute and set it to "_blank"<br />
+                    Add an "href" attribute that links to your app's main page<br />
+                    If you want to resrict the button to a certain group or user:<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;To restrict to a group: set the "data-group" attribute to what group you want to see it<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;To restrict to a user: set the "data-user" attribute to what user you want to see it<br />
+                    <center><h4>Done.</h4></center>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

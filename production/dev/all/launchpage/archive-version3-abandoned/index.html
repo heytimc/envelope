@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Workflow Products</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="resources/launch.js" type="text/javascript"></script>
+        <link href="resources/launch.css" type="text/css" rel="stylesheet" />
+        
+        <style>
+            .product-link {
+                color: #0000FF;
+            }
+            .new {
+                display: inline-block;
+                position: relative;
+            }
+            .new:after {
+                display: block;
+                position: absolute;
+                
+                top: -0.5em;
+                right: -1.5em;
+                
+                content: 'New!';
+                font-size: 0.5em;
+                color: #FFAE02;
+                
+                text-decoration: underline;
+                
+                -moz-transform: rotate(20deg);
+                -webkit-transform: rotate(20deg);
+                -o-transform: rotate(20deg);
+                -ms-transform: rotate(20deg);
+                transform: rotate(20deg);
+            }
+        </style>
+    </head>
+    <body>
+        <gs-page>
+            <gs-header class="header-row green">
+                <h2 class="row-title">Workflow Products, L.L.C.</h2>
+                <div class="link-container">
+                    <a class="row-link current" target="_self" href="index.html">Products</a>
+                    <a class="row-link" target="_self" href="support.html">Support</a>
+                </div>
+            </gs-header>
+            <gs-body padded>
+                <center><h2><a href="envelope.html" class="product-link new">Envelope Server</a></h2></center>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

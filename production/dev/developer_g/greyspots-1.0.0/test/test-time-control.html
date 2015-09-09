@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>gs-time Testing</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>gs-time Testing</h3></center></gs-header>
+            <gs-body padded>
+                No attributes
+                <gs-time></gs-time>
+                <br />
+                Attributes: 'suspend-inserted'
+                <gs-time suspend-inserted></gs-time>
+                <br />
+                Attributes: 'value=""'
+                <gs-time value=""></gs-time>
+                <br />
+                Attributes: 'value="10:30"'
+                <gs-time value="10:30"></gs-time>
+                <br />
+                Attributes: 'value="10:30PM"'
+                <gs-time value="10:30PM"></gs-time>
+                <br />
+                Attributes: 'value="10:30AM"'
+                <gs-time value="10:30AM"></gs-time>
+                <br />
+                Attributes: 'non-empty'
+                <gs-time non-empty></gs-time>
+                <br />
+                Attributes: 'value="10:30" non-empty'
+                <gs-time value="10:30" non-empty></gs-time>
+                <br />
+                Attributes: 'disabled'
+                <gs-time disabled></gs-time>
+                <br />
+                Attributes: 'value="10:30" disabled'
+                <gs-time value="10:30" disabled></gs-time>
+                <br />
+                Attributes: 'no-picker'
+                <gs-time no-picker></gs-time>
+                <br />
+                Attributes: 'mini'
+                <gs-time mini></gs-time>
+                <br />
+                Attributes: 'placeholder="Time of Tardis Appearence"'
+                <gs-time placeholder="Time of Tardis Appearence"></gs-time>
+                <br />
+                Attributes: 'placeholder="Time of Tardis Appearence" disabled'
+                <gs-time placeholder="Time of Tardis Appearence" disabled></gs-time>
+                <br />
+                Attributes: 'tabindex="3"'
+                <gs-time tabindex="3"></gs-time>
+                Attributes: 'tabindex="1"'
+                <gs-time tabindex="1"></gs-time>
+                Attributes: 'tabindex="2"'
+                <gs-time tabindex="2"></gs-time>
+                <br />
+                Attributes: 'no-now-button'
+                <gs-time no-now-button></gs-time>
+                <br />
+                Attributes: 'qs="testtime"'
+                <gs-time qs="testtime"></gs-time>
+                <br />
+                Attributes: 'format="military"'
+                <gs-time format="military"></gs-time>
+                <br />
+                Attributes: 'output-format="military"'
+                <gs-time output-format="military"></gs-time>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

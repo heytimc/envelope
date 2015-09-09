@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>Dialog Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>Dialog</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">Function(s):</b>
+                <div class="doc-section doc-mono">
+                    GS.dialog(...);<br />
+                    GS.openDialog(...);<br />
+                    GS.openDialogToElement(...);<br />
+                    GS.msgbox(...);<br />
+                    GS.inputbox(...);
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    These Javascript functions put a modal dialog in front of the document. The dialog has a transparent shadow behind it to cover the document.
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>Skeleton Example:</b><br />
+                        A basic dialog with some text and a button in it. The dialog will have the following behaviors:<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;1) The shadow will cover the document and the dialog will be in front.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;2) You can't click the page behind the dialog because of the shadow.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;3) You can dismiss the dialog by clicking the "Ok" button.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="10">
+                            function testDialog() {
+                                GS.dialog({
+                                    'content': 'This is a Dialog'
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Header Example:</b><br />
+                        A dialog with a header and some text.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="11">
+                            function testDialog() {
+                                GS.dialog({
+                                    'header': 'Dialog Header',
+                                    'content': 'Dialog Content'
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Padded Example:</b><br />
+                        A dialog with some text which has padding around it.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="11">
+                            function testDialog() {
+                                GS.dialog({
+                                    'content': 'Dialog Content',
+                                    'padded': true
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Button Example:</b><br />
+                        A dialog with two buttons and some code that runs when a button is clicked.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="20">
+                            function testDialog() {
+                                GS.dialog({
+                                    'content': 'Are you sure?',
+                                    'buttons': ['No', 'Yes'],
+                                    'before_close': function (event, strAnswer) {
+                                        if (strAnswer === 'Yes') {
+                                            alert('You clicked "Yes".');
+                                        } else {
+                                            alert('You clicked "No".');
+                                        }
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Custom Footer Example:</b><br />
+                        A dialog with a custom footer. The two buttons in the footer are marked as close buttons using the "dialogclose" attribute. When an element with the "dialogclose" attribute is clicked the dialog closes using the "value" attribute or the text of the button as the answer.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="18">
+                            function testDialog() {
+                                GS.dialog({
+                                    'content': 'Are you sure?',
+                                    'buttons': '<gs-button dialogclose>Custom 1</gs-button>' +
+                                               '<gs-button dialogclose>Custom 2</gs-button>',
+                                    'before_close': function (event, strAnswer) {
+                                        alert(strAnswer);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Closing A Dialog From Javascript Example:</b><br />
+                        A dialog that is closed using a javascript function.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="30">
+                            function testDialog() {
+                                GS.dialog({
+                                    'content': '<label for="button-test">Press this button:</label>' +
+                                               '<gs-button id="button-test">Close</gs-button>',
+                                    'buttons': ['Cancel', 'Ok'],
+                                    'after_open': function () {
+                                        var dialog = this, // save the dialog element
+                                            control = document.getElementById('button-test');
+                                        
+                                        control.addEventListener('click', function (event) {
+                                            // close the dialog using the "dialog"
+                                            //      variable we saved earlier
+                                            GS.closeDialog(dialog, 'Ok');
+                                        });
+                                    },
+                                    'before_close': function (event, strAnswer) {
+                                        alert(strAnswer);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Error Theme Example:</b><br />
+                        A dialog with the "error" theme. This header and footer of this dialog will be red.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="10">
+                            function testDialog() {
+                                GS.dialog({
+                                    'theme': 'error',
+                                    'header': 'Dialog Header',
+                                    'content': 'Dialog Content'
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Header/Content Type Example:</b><br />
+                        A dialog with four different header/content types.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;The first type is "html". This type uses the header and content as plain HTML.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;The second type is "formatted-html". This type uses the header and content as plain HTML and also preserves the whitespace by using a <span class="doc-mono">&lt;pre&gt;</span> tag.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;The third type is "text". This prevents HTML in the header and content from being parsed by HTML encoding it.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;The fourth type is "formatted-text". This prevents HTML in the header and content from being parsed by HTML encoding it and also preserves the whitespace by using a <span class="doc-mono">&lt;pre&gt;</span> tag.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="9">
+                            <gs-button onclick="testDialog('html')">HTML Dialog</gs-button>
+                            <gs-button onclick="testDialog('formatted-html')">Formatted HTML Dialog</gs-button>
+                            <gs-button onclick="testDialog('text')">Text Dialog</gs-button>
+                            <gs-button onclick="testDialog('formatted-text')">Formatted Text Dialog</gs-button>
+                        </template>
+                        <template for="js" height="10">
+                            function testDialog(strType) {
+                                GS.dialog({
+                                    'header': 'Dialog\n <b>Header</b>',
+                                    'content': 'Dialog\n <b>Content</b>',
+                                    'type': strType
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Max Width/Height Example:</b><br />
+                        A dialog with a max width and height set. The defaults for these parameters is "700px".
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="10">
+                            function testDialog() {
+                                GS.dialog({
+                                    'content': 'Dialog Content',
+                                    'max_width': '100px',
+                                    'max_height': '100px',
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Width and Height Mode Example:</b><br />
+                        A dialog with five width and height modes. The default for this parameter is "detect".<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;Mode "detect": This mode attempts to give the best experience based on the content height. A problem with this mode is that when you have an element like a gs-envelope or a gs-form that changes height some time after its creation can cause the dialog to get too tall.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;Mode "phone":  This mode goes to max_width and max_height until the page gets too small.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;Mode "touch":  This mode is full width and height on a phone, grow vertically with content everywhere else.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;Mode "constrained": This mode is full width and height on a touch device, grow vertically with content everywhere else.<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;Mode "full":   This mode is full width and height all of the time.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="9">
+                            <gs-button onclick="dialog('detect')">"detect"</gs-button>
+                            <gs-button onclick="dialog('phone')">"phone"</gs-button>
+                            <gs-button onclick="dialog('touch')">"touch"</gs-button>
+                            <gs-button onclick="dialog('constrained')">"constrained"</gs-button>
+                            <gs-button onclick="dialog('full')">"full"</gs-button>
+                        </template>
+                        <template for="js" height="10">
+                            function dialog(strMode) {
+                                GS.dialog({
+                                    // GS.lorem() is a shortcut for lorem ipsum text
+                                    'content': GS.lorem() + ' ' + GS.lorem(),
+                                    'mode': strMode
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>GS.openDialog Example:</b><br />
+                        Opening a dialog from a &lt;template&gt; element that is in the HTML. The template must have an ID and should be filled as if it is a &lt;gs-page&gt; element.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="14">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                            <template id="testDialogTemplate">
+                                <gs-header><h3>Dialog Header</h3></gs-header>
+                                <gs-body>
+                                    Dialog Content
+                                </gs-body>
+                                <gs-footer>
+                                    <gs-button dialogclose>Ok</gs-button>
+                                </gs-footer>
+                            </template>
+                        </template>
+                        <template for="js" height="5">
+                            function testDialog() {
+                                GS.openDialog('testDialogTemplate');
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>GS.openDialog After Open Callback Example:</b><br />
+                        Opening a dialog from a &lt;template&gt; and running javascript after it opens.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="16">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                            <template id="testDialogTemplate">
+                                <gs-header><h3>Dialog Header</h3></gs-header>
+                                <gs-body>
+                                    This dialog has been opened: <span id="number"></span> times.
+                                </gs-body>
+                                <gs-footer>
+                                    <gs-button dialogclose>Ok</gs-button>
+                                </gs-footer>
+                            </template>
+                        </template>
+                        <template for="js" height="12">
+                            var i = 0;
+                            
+                            function testDialog() {
+                                GS.openDialog('testDialogTemplate', function () {
+                                    i += 1;
+                                    document.getElementById('number').textContent = i;
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>GS.openDialog Before Close Callback Example:</b><br />
+                        Opening a dialog from a &lt;template&gt; and running some javascript right before it closes.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="16">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                            <template id="testDialogTemplate">
+                                <gs-header><h3>Dialog Header</h3></gs-header>
+                                <gs-body>
+                                    <label for="text-test">Put some text here:</label>
+                                    <gs-text id="text-test" value="here is some text"></gs-text>
+                                </gs-body>
+                                <gs-footer>
+                                    <gs-button dialogclose>Ok</gs-button>
+                                </gs-footer>
+                            </template>
+                        </template>
+                        <template for="js" height="12">
+                            function testDialog() {
+                                GS.openDialog('testDialogTemplate', '', function (event, strAnswer) {
+                                    alert('strAnswer: ' + strAnswer +
+                                        ' Input: ' + document.getElementById('text-test').value);
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>GS.openDialog Multiple Button Example:</b><br />
+                        Opening a dialog from a &lt;template&gt; that has two buttons and some code that runs when a button is clicked. Notice that the after open callback parameter has been blanked out using empty string.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="24">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                            <template id="testDialogTemplate">
+                                <gs-header><h3>Dialog Header</h3></gs-header>
+                                <gs-body>
+                                    Dialog Content
+                                </gs-body>
+                                <gs-footer>
+                                    <gs-grid>
+                                        <gs-block><gs-button dialogclose>No</gs-button></gs-block>
+                                        <gs-block><gs-button dialogclose>Yes</gs-button></gs-block>
+                                    </gs-grid>
+                                </gs-footer>
+                            </template>
+                        </template>
+                        <template for="js" height="15">
+                            function testDialog() {
+                                GS.openDialog('testDialogTemplate', '', function (event, strAnswer) {
+                                    if (strAnswer === 'Yes') {
+                                        alert('You clicked "Yes".');
+                                    } else {
+                                        alert('You clicked "No".');
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>GS.openDialogToElement Example:</b><br />
+                        Opening a dialog from a &lt;template&gt; that is positioned to a target element.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="17">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                            <br /><br /><br />
+                            <div id="target" class="doc-orange" style="width: 100px; height: 100px;"></div>
+                            
+                            <template id="testTemplate">
+                                <gs-header><h3>Dialog Header</h3></gs-header>
+                                <gs-body>Dialog Content</gs-body>
+                                <gs-footer>
+                                    <gs-button dialogclose>Ok</gs-button>
+                                </gs-footer>
+                            </template>
+                        </template>
+                        <template for="js" height="20">
+                            function testDialog() {
+                                GS.openDialogToElement(
+                                    document.getElementById('target'), // element to position too
+                                    'testTemplate', // template for the dialog
+                                    'right', // side that the dialog should try to go to
+                                             //   if the dialog can't go on that side it
+                                             //   will try other sides
+                                function () {
+                                    // after open, same as GS.openDialog
+                                }, function (event, strAnswer) {
+                                    // before close, same as GS.openDialog
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Message Box example:</b><br />
+                        A dialog with a header and some text.<br />
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="5">
+                            function testDialog() {
+                                GS.msgbox('Dialog Header', 'Dialog Content');
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Input Box example:</b><br />
+                        A dialog with a header, some text, and an input.<br />
+                        The third parameter is a callback function that has one argument, the text the user typed or empty string if the user canceled it.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="5">
+                            <gs-button onclick="testDialog()">Dialog</gs-button>
+                        </template>
+                        <template for="js" height="11">
+                            function testDialog() {
+                                GS.inputbox('Dialog Header', 'Dialog Content', function (text) {
+                                    alert('You typed:\n' + text);
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

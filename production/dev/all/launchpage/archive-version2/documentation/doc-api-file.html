@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <title>File API Documentation</title>
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script src="/js/ace/ace.js" data-ace-base="/js/ace/" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ext-language_tools.js" type="text/javascript"></script>
+        <script src="/js/ace/ext-searchbox.js" type="text/javascript"></script>
+        
+        <script src="doc-library/doc.js" type="text/javascript"></script>
+        <link href="doc-library/doc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <gs-page>
+            <gs-header><center><h3>File</h3></center></gs-header>
+            <gs-body padded>
+                <b class="doc-header">API:</b>
+                <div class="doc-section doc-mono">
+                    File
+                </div>
+                
+                <b class="doc-header">Description:</b>
+                <div class="doc-section">
+                    These links handle file viewing/editing/management.
+                </div>
+                
+                <b class="doc-header">Testing Folder for Examples:</b>
+                <div class="doc-section">
+                    Examples on this page require the "all" path to work properly. To enable the demonstration of features that require database functionality, please click the following button to create or refresh the "all" path. <br />
+                    We will only be working in the "all/gsdoc" path, you will create the gsdoc folder yourself with the examples. (How's that for documentation?)
+                    <gs-button id="button-test-folder">Create/Refresh Test Folder</gs-button>
+                </div>
+                
+                <b class="doc-header">Examples:</b>
+                <div class="doc-section">
+                    <div class="doc-example-description">
+                        <b>List Folder Example:</b><br/>
+                        List folders and files inside the path you send. (If you send no path, then list stuff in the root folder.)
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="path">Path:</label>
+                            <gs-text id="path" value="all"></gs-text>
+                            <gs-button onclick="ajax_example()">List</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="25">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=list' +
+                                    (document.getElementById('path').value ?
+                                    '&path='   + encodeURIComponent(document.getElementById('path').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Create Folder Example:</b><br/>
+                        This will create a folder if it doesn't already exist. It will error if it does exist.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="path">Path:</label>
+                            <gs-text id="path" value="all/gsdoc"></gs-text>
+                            <gs-button onclick="ajax_example()">Create Folder</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="25">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=create_folder' +
+                                    (document.getElementById('path').value ?
+                                    '&path='   + encodeURIComponent(document.getElementById('path').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Create File Example:</b><br/>
+                        This will create a file if it doesn't already exist. It will error if it does exist.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="path">Path:</label>
+                            <gs-text id="path" value="all/gsdoc/test.txt"></gs-text>
+                            <gs-button onclick="ajax_example()">Create File</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="25">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=create_file' +
+                                    (document.getElementById('path').value ?
+                                    '&path='   + encodeURIComponent(document.getElementById('path').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Write File Example:</b><br/>
+                        This action allows you to write to files. When you want to make sure you aren't overwriting someone's changes, send the &change_stamp= paramater to the action. You can get the change stamp you are supposed to send from the file read action that you should have already used in your file editor. If someone else changes the file since you last ran the file read action, the change stamp will not match and it will error.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="path">Path:</label>
+                            <gs-text id="path" value="all/gsdoc/test.txt"></gs-text>
+                            <label for="content">Content:</label>
+                            <gs-text id="content" value="Filetest2"></gs-text>
+                            <gs-button onclick="ajax_example()">Write</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="30">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=write' +
+                                    (document.getElementById('path').value ?
+                                    '&path='    + encodeURIComponent(document.getElementById('path').value) : '') +
+                                    (document.getElementById('content').value ?
+                                    '&content=' + encodeURIComponent(document.getElementById('content').value) : '')
+                                    //+ '&change_stamp='
+                                    , function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Exists Example:</b><br/>
+                        Sometimes you want to know if a file exists before doing something with it. This action will send a change_stamp if it does exist.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="path">Path:</label>
+                            <gs-text id="path" value="all/gsdoc/test.txt"></gs-text>
+                            <gs-button onclick="ajax_example()">Does it Exist?</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="25">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=exists' +
+                                    (document.getElementById('path').value ?
+                                    '&path='   + encodeURIComponent(document.getElementById('path').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>File View:</b><br/>
+                        You will sometimes want to read a file without ajax, that is easily done by putting the file path in the link after /v1/role/.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="path">Path:</label>
+                            <gs-text id="path" value="all/gsdoc/test.txt"></gs-text>
+                            <gs-button onclick="open_example()">View New Tab</gs-button>
+                            <gs-button onclick="ajax_example()">View Here</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="25">
+                            function open_example() {
+                                window.open('/v1/role/' + document.getElementById('path').value, "_blank");
+                            }
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxText('/v1/role/' + document.getElementById('path').value, '', function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = data;
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>File Read:</b><br/>
+                        This action allows you to get the file content in a json object along with the change_stamp.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="path">Path:</label>
+                            <gs-text id="path" value="all/gsdoc/test.txt"></gs-text>
+                            <gs-button onclick="ajax_example()">View</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="25">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=read' +
+                                    (document.getElementById('path').value ?
+                                    '&path='   + encodeURIComponent(document.getElementById('path').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>File Move:</b><br/>
+                        Allows you to move/rename file(s)/folder(s).
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="paths_from">Paths From:</label>
+                            <gs-text id="paths_from" value="[&quot;all/gsdoc/test.txt&quot;]"></gs-text>
+                            <label for="paths_to">Paths To:</label>
+                            <gs-text id="paths_to" value="[&quot;all/gsdoc/test2.txt&quot;]"></gs-text>
+                            <gs-button onclick="ajax_example()">Move</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="30">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=mv_file' +
+                                    (document.getElementById('paths_from').value ?
+                                    '&paths_from=' + encodeURIComponent(document.getElementById('paths_from').value) : '') +
+                                    (document.getElementById('paths_to').value ?
+                                    '&paths_to='   + encodeURIComponent(document.getElementById('paths_to').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>File Copy:</b><br/>
+                        Allows you to copy file(s)/folder(s).
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="paths_from">Paths From:</label>
+                            <gs-text id="paths_from" value="[&quot;all/gsdoc/test2.txt&quot;]"></gs-text>
+                            <label for="paths_to">Paths To:</label>
+                            <gs-text id="paths_to" value="[&quot;all/gsdoc/test1.txt&quot;]"></gs-text>
+                            <gs-button onclick="ajax_example()">Copy</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="30">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=cp_file' +
+                                    (document.getElementById('paths_from').value ?
+                                    '&paths_from=' + encodeURIComponent(document.getElementById('paths_from').value) : '') +
+                                    (document.getElementById('paths_to').value ?
+                                    '&paths_to='   + encodeURIComponent(document.getElementById('paths_to').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>File/Folder Remove:</b><br/>
+                        Allows you to remove file(s)/folder(s).
+                    </div>
+                    <gs-doc-example>
+                        <template for="html">
+                            <label for="paths">Paths:</label>
+                            <gs-text id="paths" value="[&quot;all/gsdoc/test2.txt&quot;]"></gs-text>
+                            <gs-button onclick="ajax_example()">Delete</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="25">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=rm_file' +
+                                    (document.getElementById('paths').value ?
+                                    '&paths=' + encodeURIComponent(document.getElementById('paths').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Grep Search:</b><br/>
+                        Sometimes you want to search the entire user folder system for something. (How did you lose your file?)
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="15">
+                            <label for="pattern">Pattern:</label>
+                            <gs-text id="pattern" value="filetest"></gs-text>
+                            <label for="case_sensitive">Case Sensitive:</label>
+                            <gs-checkbox id="case_sensitive"></gs-checkbox>
+                            <label for="regexp">Regexp:</label>
+                            <gs-checkbox id="regexp"></gs-checkbox>
+                            <gs-button onclick="ajax_example()">Search</gs-button>
+                            <pre id="ajax_result"></pre>
+                        </template>
+                        <template for="js" height="30">
+                            function ajax_example() {
+                                GS.addLoader('loader', 'Ajax running...');
+                                GS.ajaxJSON('/v1/env/action_fil', 'action=grep' +
+                                    (document.getElementById('pattern').value ?
+                                    '&pattern=' + encodeURIComponent(document.getElementById('pattern').value) : '') +
+                                    (document.getElementById('case_sensitive').value ?
+                                    '&case_sensitive=' + encodeURIComponent(document.getElementById('case_sensitive').value) : '') +
+                                    (document.getElementById('regexp').value ?
+                                    '&regexp=' + encodeURIComponent(document.getElementById('regexp').value) : ''), function (data, error) {
+                                    GS.removeLoader('loader');
+                                    
+                                    if (!error) {
+                                        document.getElementById('ajax_result').textContent = JSON.stringify(data.dat);
+                                    } else {
+                                        GS.ajaxErrorDialog(data);
+                                    }
+                                });
+                            }
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>File Upload:</b><br/>
+                        When you have a file on your desktop and you want to upload it, use a form instead of a ajax call. Forms allow file upload. Make sure you add the enctype="multipart/form-data" attribute or the browser won't even send the file. Developers can upload everywhere. Users can upload on a group_g folder if the have permission to group_w. Example: normal_g folder can be written by users with normal_w.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="15">
+                            <form id="form-file-upload" action="/v1/env/action_upload" method="POST" enctype="multipart/form-data" target="upload_response">
+                                <label for="upload-file-content">File:</label>
+                                <input type="file" id="upload-file-content" name="file_content" />
+                                <br />
+                                <label for="upload-file-name">File Path:</label>
+                                <input id="upload-file-name" name="file_name" value="/all/gsdoc/test.txt" />
+                                <gs-button id="upload-submit" onclick="document.getElementById('form-file-upload').submit();">Submit</gs-button>
+                            </form>
+                        </template>
+                    </gs-doc-example>
+                </div>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>

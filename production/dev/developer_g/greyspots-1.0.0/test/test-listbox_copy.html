@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        
+        <script src="/js/greyspots.js" type="text/javascript"></script>
+        <link href="/css/greyspots.css" type="text/css" rel="stylesheet" />
+        
+        <script>
+            /*document.addEventListener('DOMContentLoaded', function (event) {
+                document.getElementById('test').addEventListener('after_select', function (event) {
+                    this.querySelector('.scroll-container').addEventListener('scroll', function (event) {
+                        console.log(this.style.webkitOverflowScrolling);
+                        this.style.webkitOverflowScrolling = 'initial';
+                        console.log(this.style.webkitOverflowScrolling);
+                        this.style.webkitOverflowScrolling = 'touch';
+                        console.log(this.style.webkitOverflowScrolling);
+                        console.log(this.style);
+                    });
+                });
+            });*/
+        </script>
+    </head>
+    <body >
+        <gs-page>
+            <gs-header>
+                <h4>Listbox scrolling testing:</h4>
+            </gs-header>
+            <gs-body>
+                <gs-listbox src="test.tpeople" ord="first_name ASC, last_name ASC" letter-scrollbar letter-dividers id="test">
+                    <template for="table">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>{{! row.first_name }} {{! row.last_name }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </gs-listbox>
+            </gs-body>
+        </gs-page>
+    </body>
+</html>
