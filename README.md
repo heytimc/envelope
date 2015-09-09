@@ -1,6 +1,9 @@
 # envelope
 A Database Server for Postgresql with Web Access.
 
+## License
+Envelope is released with a Postgresql style license. If you can use postgresql in your project, you can use envelope.
+
 ## Install
 Before you can use envelope, you need to compile it for your system. An alternative is to download the installer from http://envelope.xyz
 
