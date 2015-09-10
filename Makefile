@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O2 -I/usr/local/pgsql/include -c
+CFLAGS=-g -Wall -Wextra -O2 -I/usr/local/pgsql/include -c
 LDFLAGS=-I/usr/local/pgsql/include -L/usr/local/pgsql/lib -Wl,-rpath -Wl,/usr/local/pgsql/lib -lssl -lpq -lcrypto
 SOURCES=src/envelope_config.c src/envelope_fossil.c \
 src/envelope_handle_auth.c src/envelope_handle_c.c \
