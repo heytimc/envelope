@@ -1,0 +1,41 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.69])
+AC_INIT([envelope], [v1.0.0], [joseph@envelope.xyz])
+AC_CONFIG_SRCDIR([src])
+
+# Checks for programs.
+AC_PROG_CC
+AC_CHECK_PROG([pg_config_found], [pg_config], [yes], [no])
+if test "x${pg_config_found}" = xno; then
+    AC_MSG_ERROR([pg_config not found; please install PostgreSQL devel package or equivalent])
+fi
+
+# Checks for libraries.
+LIBS="$LIBS -lpq -lcrypto -lssl"
+LDFLAGS="$LDFLAGS -L$(pg_config --libdir)"
+AC_CHECK_LIB([pq], [PQescapeLiteral], , AC_MSG_ERROR([no usable libpq; please install PostgreSQL devel package or equivalent]))
+
+# Checks for header files.
+CPPFLAGS="$CPPFLAGS -I$(pg_config --includedir)"
+AC_CHECK_HEADERS([libpq-fe.h], , AC_MSG_ERROR([no usable libpq; please install PostgreSQL devel package or equivalent]))
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netdb.h netinet/in.h stddef.h stdlib.h string.h sys/socket.h syslog.h unistd.h], , AC_MSG_ERROR([INSANE BUILD ENVIRONMENT DETECTED; CANNOT CONTINUE]))
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_FUNC_CHOWN
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_MKTIME
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([bzero dup2 inet_ntoa memset mkdir realpath regcomp rmdir setenv socket strchr strcspn strerror strncasecmp strrchr strstr strtol])
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

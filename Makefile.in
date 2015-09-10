@@ -1,6 +1,9 @@
-CC=gcc
-CFLAGS=-g -Wall -Wextra -O2 -I/usr/local/pgsql/include -c
-LDFLAGS=-I/usr/local/pgsql/include -L/usr/local/pgsql/lib -Wl,-rpath -Wl,/usr/local/pgsql/lib -lssl -lpq -lcrypto
+CC = @CC@
+#CPP = C Pre-Proccesser
+CPPFLAGS = @CPPFLAGS@
+CFLAGS = $(CPPFLAGS) @CFLAGS@
+LIBS = @LIBS@
+LDFLAGS = @LDFLAGS@ $(LIBS)
 SOURCES=src/envelope_config.c src/envelope_fossil.c \
 src/envelope_handle_auth.c src/envelope_handle_c.c \
 src/envelope_handle_cluster.c src/envelope_handle_file.c \
@@ -20,12 +23,12 @@ OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=envelope
 
 all: $(SOURCES) $(EXECUTABLE)
-    
-$(EXECUTABLE): $(OBJECTS) 
+
+$(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 .c.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -c -o $@
 
 clean:
 	rm $(OBJECTS) $(EXECUTABLE)
