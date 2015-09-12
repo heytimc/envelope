@@ -57,7 +57,7 @@ char *canonical(const char * file_base, const char *path, char *check_type) {
 		WARN("realpath failed: %d (%s)", errno, strerror(errno));
 	}
     
-    // DO NOT UNCOMMENT, THIS IS SO THAT THE ERROR DOES NOT PROPOGATE
+    // DO NOT COMMENT, THIS IS SO THAT THE ERROR DOES NOT PROPOGATE
     errno = 0;
     
     // check base of the resolved path with file_base if they do not match

@@ -115,16 +115,28 @@ $ envelope -c /opt/envelope/envelope.conf
 You need to set up a role in your PostgreSQL database with an email address for the role name.
 Run these commands in your PostgreSQL cluster you want to use:
 ```
-CREATE ROLE developer_g;
-CREATE ROLE trusted_g;
+CREATE ROLE developer_g
+   NOLOGIN NOCREATEROLE  NOSUPERUSER 
+   INHERIT  NOCREATEDB  NOREPLICATION 
+   CONNECTION LIMIT -1
+   VALID UNTIL 'infinity';
+
+CREATE ROLE trusted_g
+   NOLOGIN NOCREATEROLE  NOSUPERUSER 
+   INHERIT  NOCREATEDB  NOREPLICATION 
+   CONNECTION LIMIT -1
+   VALID UNTIL 'infinity';
+
 CREATE ROLE "user@example.com"
-	LOGIN PASSWORD 'test_password'
-	NOCREATEROLE  NOSUPERUSER
-	INHERIT  NOCREATEDB  NOREPLICATION
-	CONNECTION LIMIT -1
-	VALID UNTIL 'infinity';
-GRANT developer_g TO "user@example.com";
+   LOGIN PASSWORD 'password'
+   NOCREATEROLE  NOSUPERUSER 
+   INHERIT  NOCREATEDB  NOREPLICATION 
+   CONNECTION LIMIT -1
+   VALID UNTIL 'infinity';
+
 GRANT trusted_g TO "user@example.com";
+GRANT developer_g TO "user@example.com";
+
 ```
 
 #### Test

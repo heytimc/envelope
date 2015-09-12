@@ -81,10 +81,29 @@ error:
 }
 
 void init_aes_key_iv() {
-	//if we are developing
+    int int_seed = 0;
+    
+    FILE *fp = fopen("/dev/random", "r");
+    if (fp != NULL) {
+        // I could do error checking here, but for the sake of readability, I shall refrain from it
+        char *ptr_seed = salloc(4);
+        fread(ptr_seed, 1, 4, fp);
+        
+        int_seed |= ptr_seed[0] >> 0;
+        int_seed |= ptr_seed[1] >> 8;
+        int_seed |= ptr_seed[2] >> 16;
+        int_seed |= ptr_seed[3] >> 24;
+        
+        fclose(fp);
+    } else {
+        WARN_NORESPONSE("Could not open /dev/random, falling back to more conventional seed");
+        int_seed = time(NULL) * getpid() * clock();
+    }
+    
+	//if we aren't developing
 	if (bol_global_aes_key_reset) {
 		//initialize random seed
-		srand(time(NULL) * getpid() * clock());
+		srand(int_seed);
 		int i;
 		for (i = 0;i < 32;i++) {
 			str_global_aes_key_init[i] = rand() % 94 + 32;
