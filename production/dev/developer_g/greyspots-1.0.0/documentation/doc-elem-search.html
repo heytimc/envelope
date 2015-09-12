@@ -29,88 +29,100 @@
                 
                 <b class="doc-header">Description:</b>
                 <div class="doc-section">
-                    The gs-search control allows you to alter the query string. This is used in conjuction with the qs attribute on other controls.
+                    The gs-search control allows you to alter the query string for searching. This is used in conjuction with the qs attribute on other controls.
+                </div>
+                
+                <b class="doc-header">Database Functionality For Examples:</b>
+                <div class="doc-section">
+                    Examples on this page require the "gsdoc" schema to work properly. To enable the demonstration of features that require database functionality, please click the following button to create or refresh the "gsdoc" schema. <br />
+                    The "gsdoc" schema is only installed temporarily. It is lost after every Abandon, Pull or Release.<br />
+                    <gs-button id="button-documentation-schema">Create/Refresh Documentation Schema</gs-button>
                 </div>
                 
                 <b class="doc-header">Examples:</b>
                 <div class="doc-section">
                     <div class="doc-example-description">
-                        <b>Skeleton Example:</b>
+                        <b>Skeleton Example:</b><br />
                         Without attributes the gs-search will have the following behaviors:<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;1) You can type into the control.<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;2) The placeholder will default to "Search...".<br />
                         &nbsp;&nbsp;&nbsp;&nbsp;3) It won't change the query-string because we haven't told it what parameter to change.<br />
                     </div>
                     <gs-doc-example query-string="">
-                        <template for="html">
-                            <label for="control_example">Search:</label>
-                            <gs-search id="control_example"></gs-search>
+                        <template for="html" height="6">
+                            <gs-search></gs-search>
                         </template>
                     </gs-doc-example>
                     
                     <div class="doc-example-description">
-                        <b>QS Attribute:</b>
+                        <b>QS Attribute:</b><br />
                         In order to change the query string using the text inside the control, you need to use the qs="" attribute.
                     </div>
-                    <gs-doc-example query-string="a=a">
-                        <template for="html">
-                            <label for="control_example">Search:</label>
-                            <gs-search id="control_example" qs="test"></gs-search>
+                    <gs-doc-example query-string="test=test">
+                        <template for="html" height="6">
+                            <gs-search qs="test"></gs-search>
                         </template>
                     </gs-doc-example>
                     
                     <div class="doc-example-description">
-                        <b>Placeholder Attribute Example:</b>
-                        The placeholder="" attribute can be used when you don't want to use a label to explain the purpose of the control to the user. (The label and the placeholder can be used together, that's just not what normally happens.)
-                    </div>
-                    <gs-doc-example>
-                        <template for="html" height="15">
-                            <label for="control_label">Label:</label>
-                            <gs-search id="control_label"></gs-search>
-                            <label for="control_placeholder_label">Placeholder And Label:</label>
-                            <gs-search placeholder="Placeholder And Label" id="control_placeholder_label"></gs-search>
-                            <gs-search placeholder="Placeholder" id="control_placeholder"></gs-search>
-                        </template>
-                    </gs-doc-example>
-                    
-                    <div class="doc-example-description">
-                        <b>Mini Attribute Example:</b>
-                        Sometimes you are limited on space. The mini attribute can be used to make the gs-search smaller.
+                        <b>Placeholder Attribute Example:</b><br />
+                        The "placeholder" attribute specifies some placeholder text for when the control is empty.
                     </div>
                     <gs-doc-example>
                         <template for="html" height="5">
-                            <label for="control_mini">Mini:</label>
-                            <gs-search id="control_mini" mini></gs-search>
+                            <gs-search placeholder="Placeholder for when this control is empty"></gs-search>
                         </template>
                     </gs-doc-example>
                     
                     <div class="doc-example-description">
-                        <b>Tabindex Attribute Example:</b>
+                        <b>Mini Attribute Example:</b><br />
+                        Sometimes you are limited on space. The mini attribute can be used to make the gs-search smaller.
+                    </div>
+                    <gs-doc-example>
+                        <template for="html" height="4">
+                            <gs-search mini></gs-search>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Tabindex Attribute Example:</b><br />
                         With the tabindex="" attribute, you can control what order your controls are tabbed to.
                     </div>
                     <gs-doc-example>
-                        <template for="html" height="25">
-                            <label for="control_1">1:</label>
-                            <gs-text tabindex="1" id="control_1"></gs-text>
-                            <label for="control_3">3:</label>
-                            <gs-search tabindex="3" id="control_3"></gs-search>
-                            <label for="control_2">2:</label>
-                            <gs-text tabindex="2" id="control_2"></gs-text>
-                            <label for="control_4">4:</label>
-                            <gs-text tabindex="4" id="control_4"></gs-text>
+                        <template for="html" height="12">
+                            <gs-text tabindex="1"></gs-text>
+                            <gs-search tabindex="3"></gs-search>
+                            <gs-text tabindex="2"></gs-text>
+                            <gs-text tabindex="4"></gs-text>
                         </template>
                     </gs-doc-example>
                     
                     <div class="doc-example-description">
-                        <b>Disabled Attribute Example:</b>
+                        <b>Disabled Attribute Example:</b><br />
                         With the disabled attribute, you can control whether or not you can use the control.
                     </div>
                     <gs-doc-example>
-                        <template for="html" height="15">
-                            <label for="control_disabled">Disabled:</label>
-                            <gs-search disabled id="control_disabled"></gs-search>
-                            <label for="control_enabled">Not Disabled:</label>
-                            <gs-search id="control_enabled"></gs-search>
+                        <template for="html" height="5">
+                            <gs-search disabled></gs-search>
+                        </template>
+                    </gs-doc-example>
+                    
+                    <div class="doc-example-description">
+                        <b>Search Example:</b><br />
+                        This is an example of how you would use the &lt;gs-search&gt; for filtering.
+                    </div>
+                    <gs-doc-example query-string="">
+                        <template for="html" height="25">
+                            <gs-page>
+                                <gs-header>
+                                    <gs-search qs="name_search"></gs-search>
+                                </gs-header>
+                                <gs-body>
+                                    <gs-listbox src="gsdoc.tpeople_list"
+                                                where="{{= GS.searchToWhere('name', qs.name_search) }}"
+                                                refresh-on-querystring-values="name_search"></gs-listbox>
+                                </gs-body>
+                            </gs-page>
                         </template>
                     </gs-doc-example>
                 </div>

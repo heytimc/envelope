@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     function loadPushReplacePopHandler(element) {
-        element.value = GS.qryGetVal(GS.getQueryString(), element.getAttribute('id'));
+        element.value = GS.qryGetVal(GS.getQueryString(), element.getAttribute('qs') || element.getAttribute('id'));
     }
     
     // dont do anything that modifies the element here
@@ -174,10 +174,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.syncView();
             },
             change: function () {
-                var strQueryString = GS.getQueryString();
+                var strQueryString = GS.getQueryString(), strColumn = (this.getAttribute('qs') || this.getAttribute('id'));
                 
-                if ((GS.qryGetVal(strQueryString, this.getAttribute('qs')) || '') !== (this.control.value || '')) {
-                    GS.pushQueryString(this.getAttribute('qs') + '=' + encodeURIComponent(this.control.value));
+                if ((GS.qryGetVal(strQueryString, strColumn) || '') !== (this.control.value || '')) {
+                    GS.pushQueryString(strColumn + '=' + encodeURIComponent(this.control.value));
                 }
             }
         },

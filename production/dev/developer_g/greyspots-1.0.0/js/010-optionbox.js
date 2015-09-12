@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 
                 event.preventDefault();
+                event.stopPropagation();
                 
             } else if (event.keyCode === 13 || event.keyCode === 32) {
                 selectedOption = xtag.query(element, 'gs-option[selected]')[0];

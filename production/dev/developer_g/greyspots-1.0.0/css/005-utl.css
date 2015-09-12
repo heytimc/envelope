@@ -178,7 +178,7 @@ html body *[disabled],
     pointer-events: none;
     cursor: default;
     background-color: #D5D5D5;
-    color: #909090;
+    color: #444444;
 }
 
 

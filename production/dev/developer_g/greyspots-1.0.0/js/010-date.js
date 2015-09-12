@@ -804,8 +804,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             
                             currentSelectionRange = GS.getInputSelection(this.control);
                             
-                            // Prevent the browser from moving the cursor
+                            // Prevent the browser from moving the cursor and prevent envelope from using arrows
                             event.preventDefault();
+                            event.stopPropagation();
                             
                             strDateFormat = this.getAttribute('format');
                             if (!strDateFormat) {

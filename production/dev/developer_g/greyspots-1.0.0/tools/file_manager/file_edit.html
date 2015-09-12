@@ -431,12 +431,19 @@
                 var editorSelectionRange = editor.getSelectionRange(),
                     strCurrentText = editor.getValue(), i, len, replacementElementHTML;
                 
-                for (i = 0, len = replacementElement.attributes.length; i < len; i += 1) {
-                    replacementElement.setAttribute(replacementElement.attributes[i].nodeName,
-                                                    encodeHTML(replacementElement.attributes[i].value));
-                }
+                //console.log(replacementElement.outerHTML);
                 
-                replacementElementHTML = decodeHTML(replacementElement.outerHTML).replace(/=""/gim, '');
+                //for (i = 0, len = replacementElement.attributes.length; i < len; i += 1) {
+                //    //console.log(replacementElement.attributes[i].value, encodeHTML(replacementElement.attributes[i].value));
+                //    replacementElement.setAttribute(replacementElement.attributes[i].nodeName,
+                //                                    encodeHTML(replacementElement.attributes[i].value));
+                //}
+                
+                //console.log(replacementElement.outerHTML);
+                //replacementElementHTML = decodeHTML(replacementElement.outerHTML).replace(/=""/gim, '');
+                //console.log(replacementElementHTML);
+                
+                replacementElementHTML = replacementElement.outerHTML.replace(/=""/gim, '');
                 
                 if (currentElement) {
                     strCurrentText = strCurrentText.substring(0, currentElement.start) +
@@ -886,9 +893,20 @@
                                 arrDates[i].commits.reverse();
                                 
                                 for (commit_i = 0, commit_len = arrDates[i].commits.length; commit_i < commit_len; commit_i += 1) {
-                                    strHTML +=  '<gs-button class="button-commit" commit-id="' + arrDates[i].commits[commit_i].commit_id + '">' +
-                                                    arrDates[i].date + ' ' + arrDates[i].commits[commit_i].time + ' ' + arrDates[i].commits[commit_i].message +
-                                                '</gs-button>\n';
+                                    strHTML +=  
+                                        '<gs-button class="button-commit" remove-all commit-id="' + arrDates[i].commits[commit_i].commit_id + '">' +
+                                            '<gs-grid reflow-at="642px" widths="3,4" style="text-align: left;">' +
+                                                '<gs-block>' +
+                                                    '<b>Date:&nbsp;</b>' + arrDates[i].date + '<br />' +
+                                                    '<b>Commit&nbsp;ID:&nbsp;</b>' +
+                                                            arrDates[i].commits[commit_i].commit_id.replace(/[\[|\]]/g, '') +
+                                                '</gs-block>' +
+                                                '<gs-block>' +
+                                                    '<b>Time:&nbsp;</b>' + arrDates[i].commits[commit_i].time + '<br />' +
+                                                    '<b>Message:&nbsp;</b>' + arrDates[i].commits[commit_i].message +
+                                                '</gs-block>' +
+                                            '</gs-grid>' +
+                                        '</gs-button>\n';
                                 }
                             }
                             

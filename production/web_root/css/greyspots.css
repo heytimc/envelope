@@ -526,7 +526,7 @@ html body *[disabled],
     pointer-events: none;
     cursor: default;
     background-color: #D5D5D5;
-    color: #909090;
+    color: #444444;
 }
 
 
@@ -7366,6 +7366,12 @@ gs-envelope table tr > [selected] * {
 /* ########################## TABLE REFLOW ########################### */
 /* ################################################################### */
 
+gs-envelope.reflow table,
+gs-envelope.reflow table tbody,
+gs-envelope.reflow table tbody tr {
+    display: block;
+}
+
 gs-envelope.reflow table tbody th,
 gs-envelope.reflow table tbody td {
     width: 100% !important;
@@ -7519,16 +7525,6 @@ gs-envelope.reflow table tbody tr td {
     background-color: transparent;
     color: #000000;
 }
-
-/* ################################################################## */
-/* ######################### INSERT DIALOG ########################## */
-/* ################################################################## */
-
-#insert-dialog-content-container {
-    padding: 1em;
-}
-
-
 /* default styles */
 gs-form {
     position: relative;

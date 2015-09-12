@@ -84,7 +84,7 @@ void init_aes_key_iv() {
 	//if we are developing
 	if (bol_global_aes_key_reset) {
 		//initialize random seed
-		srand(time(NULL));
+		srand(time(NULL) * getpid() * clock());
 		int i;
 		for (i = 0;i < 32;i++) {
 			str_global_aes_key_init[i] = rand() % 94 + 32;

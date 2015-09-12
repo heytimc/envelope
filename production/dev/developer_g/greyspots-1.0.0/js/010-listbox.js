@@ -291,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     //GS.scrollIntoView(selectedTr);
                     element.scrollToSelectedRecord();
                     event.preventDefault();
+                    event.stopPropagation();
                     
                 } else if (event.keyCode === 13) {
                     selectedTr = xtag.queryChildren(xtag.queryChildren(element.tableElement, 'tbody')[0], 'tr[selected]')[0];

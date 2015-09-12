@@ -1,5 +1,7 @@
 
 window.addEventListener('design-register-element', function () {
+    'use strict';
+    
     registerDesignSnippet('<gs-grid>', '<gs-grid>', 'gs-grid widths="${1}">\n' +
                                                     '    <gs-block>${2}</gs-block>\n' +
                                                     '</gs-grid>');
@@ -75,6 +77,8 @@ window.addEventListener('design-register-element', function () {
 });
     
 window.addEventListener('design-register-element', function () {
+    'use strict';
+    
     registerDesignSnippet('<gs-block>', '<gs-block>', 'gs-block>${2}</gs-block>');
     
     designRegisterElement('gs-block', '/v1/dev/developer_g/greyspots-' + GS.version() + '/tools/documentation/doc-elem-grid.html');
@@ -291,13 +295,19 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             
             applyColumnCSS: function (arrWidths, intGridWidth) {
-                var i, len, unset_i, arrElements, intNumberOfWidths = arrWidths.length;
+                var i, len, unset_i, arrElements, intNumberOfWidths = arrWidths.length, intCurrentRowWidth = 0;
                 
                 // get all child blocks
                 arrElements = xtag.queryChildren(this, 'gs-block');
                 
                 // loop through the blocks
                 for (i = 0, unset_i = 0, len = arrElements.length; i < len; i += 1) {
+                    // if this is the first block in the row
+                    if (intCurrentRowWidth === 0) {
+                        // set the clear to left, this fixes an issue where a tall cell will move a cell over to the right
+                        arrElements[i].style.clear = 'left';
+                    }
+                    
                     // if this block doesn't have a set width: set its width (if there are more unset width blocks than widths: the widths repeat)
                     if (!arrElements[i].hasAttribute('width')) {
                         arrElements[i].setAttribute('width', arrWidths[unset_i % intNumberOfWidths]);
@@ -307,6 +317,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         arrElements[i].initallySet = true;
                     }
+                    
+                    intCurrentRowWidth += parseInt(arrElements[i].getAttribute('width'), 10) || arrWidths[i % intNumberOfWidths];
+                    //console.log(intCurrentRowWidth, intGridWidth);
+                    intCurrentRowWidth = intCurrentRowWidth % intGridWidth;
                 }
                 
                 // add class to the gs-grid so that the generated column CSS will apply

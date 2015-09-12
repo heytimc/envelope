@@ -196,9 +196,14 @@
                             }
                             
                             strHTML += '<div flex-horizontal flex-fill link="' + strCurrentPath + '">' +
-                                        '<gs-checkbox class="check" type="file" ' + (arrCheckedPaths.indexOf(strCurrentPath) >= 0 ? 'value="true"' : '') + ' remove-right></gs-checkbox>' +
-                                        '<gs-button "target="_blank" href="file_edit.html?link=' + encodeURIComponent(strCurrentPath) +
+                                        '<gs-checkbox class="check" type="file" ' + (arrCheckedPaths.indexOf(strCurrentPath) >= 0 ? 'value="true"' : '') + ' remove-right></gs-checkbox>';
+                            
+                            if (strCurrentPath.toLowerCase().indexOf('.zip') === strCurrentPath.length - 4) {
+                                strHTML += '<gs-button onclick="unzipFile(\'' + strCurrentPath + '\')" icononly icon="expand" remove-all></gs-button>';
+                            } else {
+                                strHTML += '<gs-button "target="_blank" href="file_edit.html?link=' + encodeURIComponent(strCurrentPath) +
                                                             '&folder=' + strFolder + '" icononly icon="pencil" remove-all></gs-button>';
+                            }
                             
                             strHTML += '<gs-button flex href="' + encodeHTML(strAnchorPath) + '" target="_blank" class="file" remove-left>' + encodeHTML(data.files[i]) + '</gs-button>' +
                                     '</div>';
@@ -274,6 +279,21 @@
                 } else {
                     document.getElementById('deleted-file-list').innerHTML = '';
                 }
+            }
+            
+            function unzipFile(strPath) {
+                GS.addLoader('file-unzip', 'Unzipping...');
+                GS.ajaxJSON(strActionLink + '/action_file', 'action=unzip&folder=' + strFolder + '&path=' + encodeURIComponent(strPath),
+                                                 function (data, error) {
+                    GS.removeLoader('file-unzip');
+                    
+                    if (!error) {
+                        listCurrentDirectory();
+                        
+                    } else {
+                        GS.ajaxErrorDialog(data);
+                    }
+                });
             }
             
             function insertFile(strFileName) {

@@ -121,6 +121,12 @@ function propertyList(selectedElement, currentElement) {
     currentElementData = currentElement;
     selectedElement = GS.cloneElement(selectedElement, document.getElementById('sandbox').contentWindow.document);
     
+    // encode attributes so that the property functions dont have to handle it
+    for (i = 0, len = selectedElement.attributes.length; i < len; i += 1) {
+        selectedElement.setAttribute(selectedElement.attributes[i].nodeName,
+                                        encodeHTML(selectedElement.attributes[i].value));
+    }
+    
     document.getElementById('element-property-title').innerHTML = 
         '<span class="tag-name">' + encodeHTML(selectedElement.nodeName) + '</span>' + 
         '<span class="tag-selector">' + encodeHTML(selectorTitleForElement(selectedElement)) + '</span><br />' +

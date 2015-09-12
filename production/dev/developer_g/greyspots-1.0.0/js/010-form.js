@@ -117,6 +117,13 @@ window.addEventListener('design-register-element', function () {
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
     
+    function triggerAfterUpdate(element) {
+        GS.triggerEvent(element, 'after_update');
+        if (element.hasAttribute('afterupdate')) {
+            new Function(element.getAttribute('afterupdate')).apply(element);
+        }
+    }
+    
     // ##################################################################
     // ######################## UPDATE FUNCTIONS ########################
     // ##################################################################
@@ -167,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 
                 //element.lastSuccessData.dat[0] = event.detail.response;
-                GS.triggerEvent(element, 'after_update');
+                triggerAfterUpdate(element);
                 handleData(element, element.lastSuccessData);
             } else {
                 GS.ajaxErrorDialog(event.detail.response);
@@ -220,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             updateDataWithoutTemplate(element);
                             
                         } else {
-                            GS.triggerEvent(element, 'after_update');
+                            triggerAfterUpdate(element);
                         }
                         
                     } else if (bolErrorHandling !== false) {
@@ -374,12 +381,22 @@ document.addEventListener('DOMContentLoaded', function () {
             
             element.innerHTML = dataTemplateRecords(element, data);
             
-            // if template is not native: handle templates inside the switch
+            // if template is not native: handle templates inside the form
             if (shimmed.HTMLTemplateElement) {
                 HTMLTemplateElement.bootstrap(element);
             }
             
-            //console.log('hey again', intColumnElementFocusNumber);
+            // handle autofocus
+            arrElements = xtag.query(element, '[autofocus]');
+            
+            if (arrElements.length > 0 && !evt.touchDevice) {
+                arrElements[0].focus();
+                
+                if (arrElements.length > 1) {
+                    console.warn('dialog Warning: Too many [autofocus] elements, defaulting to the first one. Please have only one [autofocus] element per form.');
+                }
+            }
+            
             // if there is a intColumnElementFocusNumber: restore focus
             if (intColumnElementFocusNumber) {
                 arrElements = xtag.query(element, '[column]');

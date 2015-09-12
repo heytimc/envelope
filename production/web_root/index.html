@@ -114,17 +114,18 @@
     </head>
     <body>
         <gs-page>
-            <gs-header><center><h3>Login</h3></center></gs-header>
+            <gs-header flex-horizontal>
+                <gs-button icon="cog" icononly style="visibility: hidden;"></gs-button>
+                <center flex><h3>Login</h3></center>
+                <gs-button href="/certificate/index.html" icon="cog" icononly></gs-button>
+            </gs-header>
             <gs-body>
                 <div id="container">
                     <gs-text id="normal-uname" placeholder="Username" autocapitalize="off" type="email"></gs-text>
                     <br />
                     <gs-text id="normal-pword" placeholder="Password" type="password"></gs-text>
                     <br />
-                    <gs-grid padded reflow-at="767px">
-                        <gs-block><gs-button id="button-login">Sign In</gs-button></gs-block>
-                        <gs-block><gs-button href="/certificate/index.html">Certificate Error? Click Here.</gs-button></gs-block>
-                    </gs-grid>
+                    <gs-button id="button-login">Sign In</gs-button>
                     <br />
                     <br />
                     <div id="error"></div>

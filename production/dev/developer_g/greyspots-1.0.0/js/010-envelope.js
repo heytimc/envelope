@@ -403,6 +403,11 @@ document.addEventListener('DOMContentLoaded', function () {
             theadElement = xtag.queryChildren(tableElement, 'thead')[0];
             tbodyElement = xtag.queryChildren(tableElement, 'tbody')[0];
             
+            // if there is a limit button
+            if (element.limitButtonElement) {
+                element.limitButtonElement.textContent = data.dat.length + ' of ' + data.row_count;
+            }
+            
             //console.log(tableTemplateElement, element.tableTemplate, theadElement, tbodyElement);
             
             if (!theadElement) {
@@ -796,10 +801,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         
         // limit hud button
+        element.limitButtonElement = '';
         if (!element.hasAttribute('no-hudlimit')) {
+            //console.log(element, element.lastSuccessData);
             divElement.innerHTML = '<span flex></span><gs-button inline no-focus>Limit</gs-button>';
             
             hudLimitButton = divElement.childNodes[1];
+            
+            element.limitButtonElement = hudLimitButton;
             
             elementHudBottomContainer.appendChild(divElement.childNodes[0]);
             elementHudBottomContainer.appendChild(divElement.childNodes[0]);

@@ -713,8 +713,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (selectedTr) {
                     element.control.value = xtag.queryChildren(selectedTr, 'td')[0].textContent;
                 }
+                
                 GS.setInputSelection(element.control, 0, element.control.value.length);
+                
                 event.preventDefault();
+                event.stopPropagation();
                 
             } else if ((intKeyCode === 39) && !event.shiftKey && !event.metaKey && !event.ctrlKey && !element.error) {
                 selectedTr = xtag.queryChildren(xtag.queryChildren(element.dropDownTable, 'tbody')[0], 'tr[selected]')[0];
@@ -734,6 +737,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectRecord(element, selectedTr,
                                 element.innerValue !== (selectedTr.getAttribute('value') || strTextValue));
                 }
+                
+                event.stopPropagation();
                 
             } else if (event.keyCode === 13 || event.keyCode === 9) {
                 if (element.dropDownTable && xtag.queryChildren(xtag.queryChildren(element.dropDownTable, 'tbody')[0], 'tr[selected]').length > 0) {
