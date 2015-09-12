@@ -4,6 +4,8 @@
 --2: decoding URI strings
 --3: also for encoding JSON objects
 
+CREATE SCHEMA postage;
+
 -- Function: postage.text_to_uri(text)
 
 -- DROP FUNCTION postage.text_to_uri(text);

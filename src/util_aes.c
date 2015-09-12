@@ -96,8 +96,12 @@ void init_aes_key_iv() {
         
         fclose(fp);
     } else {
-        WARN_NORESPONSE("Could not open /dev/random, falling back to more conventional seed");
-        int_seed = time(NULL) * getpid() * clock();
+        ERROR_NORESPONSE("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
+        ERROR_NORESPONSE("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+        ERROR_NORESPONSE("INSANE ENVIRONMENT DETECTED:COULDN'T OPEN /dev/random");
+        ERROR_NORESPONSE("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        ERROR_NORESPONSE("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
+        exit(1);
     }
     
 	//if we aren't developing
