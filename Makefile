@@ -1,9 +1,9 @@
 CC = gcc
 #CPP = C Pre-Proccesser
-CPPFLAGS =  -I/usr/local/pgsql/include
+CPPFLAGS =  -I/opt/pgsql/include
 CFLAGS = $(CPPFLAGS) -g -O2
 LIBS = -lpq  -lpq -lcrypto -lssl
-LDFLAGS =  -L/usr/local/pgsql/lib $(LIBS)
+LDFLAGS =  -L/opt/pgsql/lib $(LIBS)
 SOURCES=src/envelope_config.c src/envelope_fossil.c \
 src/envelope_handle_auth.c src/envelope_handle_c.c \
 src/envelope_handle_cluster.c src/envelope_handle_file.c \

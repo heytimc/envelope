@@ -2,3 +2,6 @@
 obj/*.o
 # Compiled binary
 envelope
+Makefile
+config.log
+config.status

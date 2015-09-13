@@ -84,47 +84,24 @@ error:
 	return NULL;
 }
 
-void init_aes_key_iv() {
-    int int_seed = 0;
-    
-    FILE *fp = fopen("/dev/random", "r");
-    if (fp != NULL) {
-        // I could do error checking here, but for the sake of readability, I shall refrain from it
-        char *ptr_seed = salloc(4);
-        fread(ptr_seed, 1, 4, fp);
-        
-        int_seed |= ptr_seed[0] >> 0;
-        int_seed |= ptr_seed[1] >> 8;
-        int_seed |= ptr_seed[2] >> 16;
-        int_seed |= ptr_seed[3] >> 24;
-        
-        fclose(fp);
-    } else {
-        ERROR_NORESPONSE("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
-        ERROR_NORESPONSE("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
-        ERROR_NORESPONSE("INSANE ENVIRONMENT DETECTED:COULDN'T OPEN /dev/random");
-        ERROR_NORESPONSE("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-        ERROR_NORESPONSE("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
-        exit(1);
-    }
-    
-	//if we aren't developing
+bool init_aes_key_iv() {
+	// production
 	if (bol_global_aes_key_reset) {
-		//initialize random seed
-		srand(int_seed);
-		int i;
-		for (i = 0;i < 32;i++) {
-			str_global_aes_key_init[i] = rand() % 255;
-		}
-		for (i = 0;i < 16;i++) {
-			str_global_aes_iv_init[i] = rand() % 255;
-		}
+		ERROR_CHECK(RAND_bytes((unsigned char *)str_global_aes_key_init, 32),
+			"RAND_bytes failed");
+		ERROR_CHECK(RAND_bytes((unsigned char *)str_global_aes_iv_init, 16),
+			"RAND_bytes failed");
+	// development
 	} else {
         // The reason for this is so that if you are planning on developing, you are going to be restarting the server a lot
         // So we put this here so that you don't get kicked out every time it restarts
 		memcpy(str_global_aes_key_init, "12345678901234567890123456789012", 32);
 		memcpy(str_global_aes_iv_init , "1234567890123456", 16);
 	}
+	
+	return true;
+error:
+	return false;
 }
 
 void set_aes_key_iv() {

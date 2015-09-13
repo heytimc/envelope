@@ -98,7 +98,10 @@ int main(int argc, char **argv) {
         return 1;
     }
 	
-	init_aes_key_iv();
+	if (!init_aes_key_iv()) {
+		DEBUG("init_aes_key_iv failed");
+		return 1;
+	}
 	
 	//get time zone
 	time_t time_last;
@@ -137,7 +140,10 @@ int main(int argc, char **argv) {
 		
 		//check for reinit
 		if (tm_current->tm_yday != tm_last->tm_yday) {
-			init_aes_key_iv();
+			if (!init_aes_key_iv()) {
+				DEBUG("init_aes_key_iv failed");
+				return 1;
+			}
 			tm_last = tm_current;
 		}
 		

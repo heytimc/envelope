@@ -427,7 +427,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/Users/nunzio/Repos/postage/envelope'
+ac_pwd='/Users/joseph/Repos/postage/envelope'
 srcdir='.'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
@@ -590,8 +590,8 @@ S["pg_config_found"]="yes"
 S["OBJEXT"]="o"
 S["EXEEXT"]=""
 S["ac_ct_CC"]="gcc"
-S["CPPFLAGS"]=" -I/usr/local/pgsql/include"
-S["LDFLAGS"]=" -L/usr/local/pgsql/lib"
+S["CPPFLAGS"]=" -I/opt/pgsql/include"
+S["LDFLAGS"]=" -L/opt/pgsql/lib"
 S["CFLAGS"]="-g -O2"
 S["CC"]="gcc"
 S["target_alias"]=""

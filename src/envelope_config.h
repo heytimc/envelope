@@ -113,8 +113,6 @@ char *str_current_subdomain;
 
 bool get_full_conf(int argc, char **argv);
 bool create_home_folders();
-void init_aes_key_iv();
-void set_aes_key_iv();
 void free_config();
 bool username_check(char *str_username);
 
