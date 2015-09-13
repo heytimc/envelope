@@ -1,6 +1,10 @@
 #include "util_aes.h"
 
 bool bol_global_aes_key_reset = true;
+char str_global_aes_key[32];
+char str_global_aes_iv[16];
+char str_global_aes_key_init[32];
+char str_global_aes_iv_init[16];
 
 char *aes_encrypt(char *str_plaintext, int *ptr_int_plaintext_length) {
 	DEFINE_VAR_ALL(str_output);
@@ -116,6 +120,8 @@ void init_aes_key_iv() {
 			str_global_aes_iv_init[i] = rand() % 94 + 32;
 		}
 	} else {
+        // The reason for this is so that if you are planning on developing, you are going to be restarting the server a lot
+        // So we put this here so that you don't get kicked out every time it restarts
 		memcpy(str_global_aes_key_init, "12345678901234567890123456789012", 32);
 		memcpy(str_global_aes_iv_init , "1234567890123456", 16);
 	}
