@@ -16,10 +16,6 @@
 #include "aes.h"
 
 bool bol_global_aes_key_reset;
-char str_global_aes_key[32];
-char str_global_aes_iv[16];
-char str_global_aes_key_init[32];
-char str_global_aes_iv_init[16];
 
 char *aes_encrypt(char *str_plaintext, int *ptr_int_plaintext_length);
 char *aes_decrypt(char *str_ciphertext_base64, int *ptr_int_ciphertext_length);
