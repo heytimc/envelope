@@ -110,10 +110,10 @@ void init_aes_key_iv() {
 		srand(int_seed);
 		int i;
 		for (i = 0;i < 32;i++) {
-			str_global_aes_key_init[i] = rand() % 94 + 32;
+			str_global_aes_key_init[i] = rand() % 255;
 		}
 		for (i = 0;i < 16;i++) {
-			str_global_aes_iv_init[i] = rand() % 94 + 32;
+			str_global_aes_iv_init[i] = rand() % 255;
 		}
 	} else {
 		memcpy(str_global_aes_key_init, "12345678901234567890123456789012", 32);
