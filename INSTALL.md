@@ -120,6 +120,12 @@ CREATE ROLE developer_g
    INHERIT  NOCREATEDB  NOREPLICATION 
    CONNECTION LIMIT -1
    VALID UNTIL 'infinity';
+   
+CREATE ROLE public_g
+   NOLOGIN NOCREATEROLE  NOSUPERUSER 
+   INHERIT  NOCREATEDB  NOREPLICATION 
+   CONNECTION LIMIT -1
+   VALID UNTIL 'infinity';
 
 CREATE ROLE trusted_g
    NOLOGIN NOCREATEROLE  NOSUPERUSER 
@@ -134,9 +140,16 @@ CREATE ROLE "user@example.com"
    CONNECTION LIMIT -1
    VALID UNTIL 'infinity';
 
+CREATE ROLE public_user
+   LOGIN PASSWORD '872345g3uhto28y927ygr28hr2ht'
+   NOCREATEROLE  NOSUPERUSER 
+   INHERIT  NOCREATEDB  NOREPLICATION 
+   CONNECTION LIMIT -1
+   VALID UNTIL 'infinity';
+
+GRANT public_g TO public_user;
 GRANT trusted_g TO "user@example.com";
 GRANT developer_g TO "user@example.com";
-
 ```
 
 #### Test
