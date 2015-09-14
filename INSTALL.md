@@ -4,9 +4,21 @@ The Envelope team has gone to great pains to provide a free installer for Envelo
 If for some reason you need to compile Envelope yourself, the following instructions should help. After you compile Envelope you need to put together a folder with all the appropriate assets to get an instance of Enevelope that will publish your PostgreSQL database. Those instructions are included as well, but we recommend that, even thought you compiled Envelope manually, its still a good idea to use the installer to handle instance creation. 
 
 #### Compile
-Run the `make` command to compile Envelope.
+Run `./configure && make` to compile Envelope.
 ```
-joseph@glock:~/Downloads/envelope
+joseph@example.com:~/Repos/postage/envelope
+$ ./configure
+checking for gcc... gcc
+checking whether the C compiler works... yes
+```
+...et cetera...
+```
+checking for strstr... yes
+checking for strtol... yes
+configure: creating ./config.status
+config.status: creating Makefile
+
+joseph@example.com:~/Downloads/envelope
 $ make
 gcc -O2 -I/usr/local/pgsql/include -c src/envelope_config.c -o src/envelope_config.o
 gcc -O2 -I/usr/local/pgsql/include -c src/envelope_fossil.c -o src/envelope_fossil.o
@@ -21,31 +33,31 @@ gcc -I/usr/local/pgsql/include -L/usr/local/pgsql/lib -Wl,-rpath -Wl,/usr/local/
 #### Prepare instance directory
 
 ```
-joseph@glock:~/Downloads/envelope
+joseph@example.com:~/Downloads/envelope
 $ su - super
 
-super@glock:~
+super@example.com:~
 $ su -
 
-root@glock:~
+root@example.com:~
 $ mkdir /opt/envelope/
 
-root@glock:~
+root@example.com:~
 $ mkdir /opt/envelope/fossil/
 
-root@glock:~
+root@example.com:~
 $ fossil init /opt/envelope/fossil/fossil_bare
 project-id: 9e5a47f8a1afe9b03e464f4c0691c55c18cf9514
 server-id:  8931ef52a63ca7ba0cc74a73f6680122cea8a016
 admin-user: root (initial password is "f03302")
 
-root@glock:~
+root@example.com:~
 $ cp -r /Users/joseph/Downloads/envelope/production /opt/envelope/fossil/production
 
-root@glock:~
+root@example.com:~
 $ cd /opt/envelope/fossil/production
 
-root@glock:/opt/envelope/fossil/production
+root@example.com:/opt/envelope/fossil/production
 $ fossil open /opt/envelope/fossil/fossil_bare
 project-name: <unnamed>
 repository:   /opt/envelope/fossil/fossil_bare
@@ -58,7 +70,7 @@ tags:         trunk
 comment:      initial empty check-in (user: root)
 check-ins:    1
 
-root@glock:/opt/envelope/fossil/production
+root@example.com:/opt/envelope/fossil/production
 $ fossil addremove
 ADDED  dev/all/file_manager/design_property.js
 ADDED  dev/all/file_manager/design_standard_elements.js
@@ -69,19 +81,19 @@ ADDED  web_root/workflowproducts.com/index.html
 ADDED  web_root/workflowproducts.com/js/greyspots.js
 added 763 files, deleted 0 files
 
-root@glock:/opt/envelope/fossil/production
+root@example.com:/opt/envelope/fossil/production
 $ fossil commit -m "initialization"
 ./dev/all/launchpage/resources/joseph.jpg contains binary data. Use --no-warnings or the "binary-glob" setting to disable this warning.
 Commit anyhow (a=all/y/N)? a
 New_Version: b8e8b21817aac20f04571400e332aa677028d8b5
 
-root@glock:/opt/envelope/fossil/production
+root@example.com:/opt/envelope/fossil/production
 $ chown -R joseph /opt/envelope
 ```
 
 #### Set up a domain
 ```
-root@glock:/opt/envelope/fossil/production
+root@example.com:/opt/envelope/fossil/production
 $ nano /etc/hosts
 ```
 Add records like these, replace `example.com` with your domain name.
@@ -95,7 +107,7 @@ Add records like these, replace `example.com` with your domain name.
 The explanations for the configuration parameters are in the configuration file.
 Use your favorite editor to modify the envelope.conf file.
 ```
-root@glock:/opt/envelope/fossil/production
+root@example.com:/opt/envelope/fossil/production
 $ nano envelope.conf
 ```
 
@@ -107,7 +119,7 @@ Fossil has a license that is very compatible with commercial uses. If you want E
 #### Run
 This is a simple test run, you will need to setup a service startup script before rolling it out to production.
 ```
-joseph@glock:~/Downloads/envelope
+joseph@example.com:~/Downloads/envelope
 $ envelope -c /opt/envelope/envelope.conf
 ```
 
@@ -153,4 +165,4 @@ GRANT developer_g TO "user@example.com";
 ```
 
 #### Test
-Go to www.example.com or whatever domain you set up. Login with your new role.
+Go to www.example.com or whatever domain you set up, then login with your new role.
