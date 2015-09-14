@@ -164,9 +164,9 @@ bool get_full_conf(int argc, char **argv) {
 	}
 	
 	//put the defaults in the global variables
-	ERROR_CAT_CSTR(str_global_install_path, "/opt/sunnyserve");
+	ERROR_CAT_CSTR(str_global_install_path, "/opt/envelope");
 	int_global_envelope_port = 8888;
-	ERROR_CAT_CSTR(str_global_cluster_path, "/opt/sunnyserve/data");
+	ERROR_CAT_CSTR(str_global_cluster_path, "/opt/envelope/data");
 	ERROR_CAT_CSTR(str_global_conn_host, "127.0.0.1");
 	ERROR_CAT_CSTR(str_global_conn_sslmode, "allow");
 	ERROR_CAT_CSTR(str_global_conn_dbname, "postgres");
@@ -174,7 +174,7 @@ bool get_full_conf(int argc, char **argv) {
 	//on superuser domains, int_global_conn_port will remain the same, int_global_current_conn_port will change
 	int_global_conn_port = 5432;
 	int_global_current_conn_port = 5432;
-	ERROR_CAT_CSTR(str_global_role_path, "/opt/sunnyserve/role");
+	ERROR_CAT_CSTR(str_global_role_path, "/opt/envelope/role");
 	ERROR_CAT_CSTR(str_global_log_level, "error");
 	ERROR_CAT_CSTR(str_global_public_username, "public_user");
 	ERROR_CAT_CSTR(str_global_public_password, "public_password");
