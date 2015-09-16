@@ -577,6 +577,7 @@
     
     defineButton('gs-delete-button',
                  '/v1/dev/developer_g/greyspots-' + GS.version() + '/tools/documentation/doc-elem-delete-button.html',
+                 true,
                  function (selectedElement) {
         addProp('Source', true, '<gs-text class="target" value="' + (selectedElement.getAttribute('src') || '') + '" mini></gs-text>', function () {
             return setOrRemoveTextAttribute(selectedElement, 'src', this.value, false);
@@ -587,9 +588,20 @@
         });
         
     }, function (element) {
-        if (element.hasAttribute('value')) {
+        if (element.getAttribute('value')) {
             GS.msgbox('Are you sure...', '<center>Are you sure you want to delete?</center>', ['No', 'Yes'], function (strAnswer) {
+                var queryStringTemplateFunction;
+                
                 if (strAnswer === 'Yes') {
+                    queryStringTemplateFunction = function (template) {
+                        var strWrapperTemplate = '{{##def.snippet:\n' +
+                                                 '    {{ var qs = jo; }} {{# def.template }}\n' +
+                                                 '#}}\n' +
+                                                 '{{#def.snippet}}';
+                        
+                        return doT.template(strWrapperTemplate, null, {'template': decodeHTML(template)})(GS.qryToJSON(GS.getQueryString())).trim();
+                    };
+                    
                     GS.addLoader('gs-delete', 'Deleting Record...');
                     
                     GS.ajaxJSON('/v1/' + (element.getAttribute('action-delete') || 'env/action_delete'),
@@ -613,26 +625,6 @@
         }
     });
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

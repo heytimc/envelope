@@ -42,6 +42,7 @@
 #define  sunny_send_return(str_user_environment, str_stdin_input, ...)     s_exec_send_return(str_user_environment, str_stdin_input, VA_NUM_ARGS(__VA_ARGS__),##__VA_ARGS__)
 
 extern int global_csock;
+extern int global_csock2;
 
 int s_exec(char *str_user_environment, int args, ... );
 char *s_exec_return(char *str_user_environment, int args, ... );

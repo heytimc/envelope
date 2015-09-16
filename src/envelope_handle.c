@@ -468,7 +468,7 @@ finish:
 		ERROR_NORESPONSE("no str_response");
 	}
 	fsync(csock);
-	NOTICE("RESPONSE SENT");
+	NOTICE("RESPONSE SENT %d bytes", strlen(str_complete_response));
 	if (cnxn != NULL) PQfinish(cnxn);
 	SFREE_PWORD(str_request);
 	SFREE_ALL();

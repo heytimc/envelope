@@ -131,15 +131,15 @@ error:
 bool get_full_conf(int argc, char **argv) {
 	int index;
 	int c;
-	char *str_config_file = NULL;
 	
 	opterr = 0;
+	optind = 1;
 	
 	// get the configuration file from the options
 	while ((c = getopt (argc, argv, "c:")) != -1) {
 		switch (c) {
 			case 'c':
-				str_config_file = optarg;
+				ERROR_CAT_CSTR(str_global_config_file, optarg);
 				break;
 			case '?':
 				/*
@@ -157,7 +157,8 @@ bool get_full_conf(int argc, char **argv) {
 		}
 	}
 	
-	DEBUG("str_config_file = %s\n", str_config_file);
+	DEBUG(">%d|%s|%s|%s<\n", argc, argv[0], argv[1], argv[2]);
+	DEBUG("str_global_config_file = %s\n", str_global_config_file);
 	
 	for (index = optind; index < argc; index++) {
 		DEBUG("Non-option argument %s\n", argv[index]);
@@ -200,11 +201,14 @@ bool get_full_conf(int argc, char **argv) {
 	
 	//this is where we parse the ini file, it will run the handler for each directive
     char *str_config_empty = "";
-    if (ini_parse(str_config_file, handler, &str_config_empty) < 0) {
+    if (ini_parse(str_global_config_file, handler, &str_config_empty) < 0) {
         printf("Can't load '%s'\n", str_config_empty);
         //exit;
     }
 	
+	
+	opterr = 0;
+	optind = 1;
 	
 	//after the defaults and the configuration file, we are ready to read the command line options
 	//ini files are preferred, but command line option would work.
@@ -385,6 +389,7 @@ bool get_full_conf(int argc, char **argv) {
 	
 	INFO("CREATE_HOME_FOLDERS");
 	create_home_folders();
+	DEBUG("CREATE_HOME_FOLDERS DONE");
 	return true;
 error:
 	return false;
@@ -529,6 +534,7 @@ error:
 
 // free config variables
 void free_config() {
+	SFREE(str_global_config_file);
 	SFREE(str_global_install_path);
 	SFREE(str_global_cluster_path);
 	SFREE(str_global_conn_host);

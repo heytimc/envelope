@@ -25,6 +25,8 @@ char *str_global_new_encrypted_cookie;
 bool bol_global_public;
 //generated from globals
 char *str_global_fossil_path;
+//conf file
+char *str_global_config_file;
 //from conf
 char *str_global_install_path;
 int int_global_envelope_port;

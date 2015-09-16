@@ -1,6 +1,7 @@
 #include "util_exec.h"
 
 int global_csock = -1;
+int global_csock2 = -1;
 
 // safe system execute function
 int s_exec(char *str_user_environment, int args, ...) {
@@ -52,6 +53,11 @@ error:
 		if (global_csock > -1) {
 			DEBUG("close(global_csock): %i", global_csock);
 			close(global_csock);
+		}
+		DEBUG("global_csock2: %i", global_csock2);
+		if (global_csock2 > -1) {
+			DEBUG("close(global_csock2): %i", global_csock2);
+			close(global_csock2);
 		}
 		// the first item is our program executable
 		// assemble a nice array of all our args with a null element at the end
@@ -293,6 +299,11 @@ error:
 	if (global_csock > -1) {
 		DEBUG("close(global_csock): %i", global_csock);
 		close(global_csock);
+	}
+	DEBUG("global_csock2: %i", global_csock2);
+	if (global_csock2 > -1) {
+		DEBUG("close(global_csock2): %i", global_csock2);
+		close(global_csock2);
 	}
 
 	if (close(pfp[parent_end]) == -1)	{/* close the other end	*/
@@ -569,6 +580,11 @@ error:
 	if (global_csock > -1) {
 		DEBUG("close(global_csock): %i", global_csock);
 		close(global_csock);
+	}
+	DEBUG("global_csock2: %i", global_csock2);
+	if (global_csock2 > -1) {
+		DEBUG("close(global_csock2): %i", global_csock2);
+		close(global_csock2);
 	}
 	
 	if (close(pfp1[parent1_end]) == -1)	{/* close the parent end	*/
